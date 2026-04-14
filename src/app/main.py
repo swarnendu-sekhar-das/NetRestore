@@ -48,12 +48,21 @@ def load_qa_engine(api_key: str = None):
     return ProceduralQAEngine(retriever_pipeline=retriever)
 
 # Header Information
-st.title("📡 Procedural QA for Telecom Service Restoration")
 st.markdown("""
-This system uses Retrieval-Augmented Generation (RAG) to find and output the exact Standard Operating Procedures (SOPs) for telecom service restoration.
-It uses hybrid search, semantic chunking, and **chain-of-thought reasoning** to ensure procedural steps are kept intact without skipping or hallucinating.
-Follow-up questions are supported — the system maintains conversational context.
-""")
+<h1 style='text-align: center;'>
+    <span style='font-size: 60px;'>📡</span> 
+</h1>
+""", unsafe_allow_html=True)
+st.markdown("""
+<h1 style='text-align: center; font-size: 45px;'>
+    Procedural QA RAG for Telecom Service Restoration
+</h1>
+""", unsafe_allow_html=True)
+st.markdown("""
+<p style='text-align: center; font-size: 18px;'>
+A RAG-based system designed for telecom network restoration operations by retrieving precise restoration SOPs for outages, faults, and incidents using hybrid search and LLM reasoning, enabling faster and more reliable service recovery.
+</p>
+""", unsafe_allow_html=True)
 
 
 if "GROQ_API_KEY" not in os.environ and "api_key" not in st.session_state:
