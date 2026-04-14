@@ -31,21 +31,17 @@ spec:
         app: telecom-rag
       # HashiCorp Vault Agent Injector annotations
       # These tell the Vault sidecar to inject the GROQ_API_KEY into the pod
-      annotations:
-        vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/role: "telecom-rag"
-        vault.hashicorp.com/agent-inject-secret-groq: "secret/data/telecom-rag/groq"
-        vault.hashicorp.com/agent-inject-template-groq: |
-          {{- with secret "secret/data/telecom-rag/groq" -}}
-          export GROQ_API_KEY="{{ .Data.data.api_key }}"
-          {{- end -}}
+      annotations: {}
     spec:
       containers:
         - name: telecom-rag
-          image: YOUR_DOCKERHUB_USER/telecom-rag:latest
+          image: ssd31/telecom-rag:latest
           ports:
             - containerPort: 8501
               name: streamlit
+          env:
+            - name: GROQ_API_KEY
+              value: "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"
           # Resource requests/limits for HPA CPU-based scaling
           resources:
             requests:
