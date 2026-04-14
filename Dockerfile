@@ -5,8 +5,11 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /app
 COPY requirements.txt .
-# Use uv for fast, conflict-free dependency resolution
-RUN pip install uv && uv pip install --system --prefix=/install -r requirements.txt
+# Install CPU-only torch FIRST to prevent uv from pulling 2GB+ of NVIDIA CUDA packages
+RUN pip install uv && \
+    uv pip install --system --prefix=/install torch torchvision \
+        --index-url https://download.pytorch.org/whl/cpu && \
+    uv pip install --system --prefix=/install -r requirements.txt
 
 # ---- Runtime Stage ----
 FROM python:3.11-slim
