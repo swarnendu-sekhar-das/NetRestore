@@ -29,16 +29,38 @@ class DataPipeline:
             return []
 
         print("Chunking documents structually (by headers)...")
-        nodes = self.chunker.get_nodes_from_documents(docs)
-        print(f"Produced {len(nodes)} structural chunks.")
+        nodes = []
+        for doc in docs:
+            # Document-level vendor extraction (Fallback for chunks that don't mention it)
+            doc_vendor = None
+            vendors = ["Cisco", "Nokia", "Juniper", "Ericsson", "Huawei"]
+            # Check first 500 chars or filename
+            content_sample = doc.get_content()[:500].lower()
+            file_name_info = doc.metadata.get("file_name", "").lower()
+            for v in vendors:
+                if v.lower() in content_sample or v.lower() in file_name_info:
+                    doc_vendor = v
+                    break
 
-        print("Extracting metadata...")
-        # Since we are using an async-compatible extractor from LlamaIndex BaseExtractor, 
-        # we can just run our custom synchronous extraction logic over the nodes directly for this demo
-        for node in nodes:
-            metadata = self.metadata_extractor._extract_metadata(node.get_content())
-            # Safely merge extracted dict into the node's existing metadata
-            node.metadata.update(metadata)
+            # Current nodes for this doc
+            doc_nodes = self.chunker.get_nodes_from_documents([doc])
+            
+            for node in doc_nodes:
+                # Extract specific metadata (Alarm codes, etc.)
+                metadata = self.metadata_extractor._extract_metadata(node.get_content())
+                node.metadata.update(metadata)
+                
+                # Propagate doc-level vendor if node-level extraction missed it
+                if "equipment_vendor" not in node.metadata and doc_vendor:
+                    node.metadata["equipment_vendor"] = doc_vendor
+                
+                # Ensure filename is also in metadata for easier source tracking
+                if "file_name" not in node.metadata:
+                    node.metadata["file_name"] = doc.metadata.get("file_name", "Unknown")
+            
+            nodes.extend(doc_nodes)
+
+        print(f"Produced and enriched {len(nodes)} structural chunks.")
 
         print("--- Data Pipeline Finished ---")
         return nodes

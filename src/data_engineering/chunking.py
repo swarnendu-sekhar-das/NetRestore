@@ -35,10 +35,14 @@ class TelecomMetadataExtractor(BaseExtractor):
             
         # Extract Vendor
         vendors = ["Cisco", "Nokia", "Juniper", "Ericsson", "Huawei"]
+        vendor_found = False
         for vendor in vendors:
             if vendor.lower() in text.lower():
                 metadata["equipment_vendor"] = vendor
-                break # Just keep the first one found for simplicity
+                vendor_found = True
+                break
+        
+        # If no vendor found in chunk, we don't set it (pipeline will propagate)
                 
         # Extract Severity
         severity_match = re.search(r'Severity:\s*(Critical|Major|Minor|Warning)', text, re.IGNORECASE)
