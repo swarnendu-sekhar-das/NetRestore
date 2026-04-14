@@ -42,6 +42,8 @@ spec:
           env:
             - name: GROQ_API_KEY
               value: "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"
+            - name: FORCE_DB_REBUILD
+              value: "true"
           # Resource requests/limits for HPA CPU-based scaling
           resources:
             requests:

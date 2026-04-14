@@ -7,8 +7,12 @@ echo "--- Starting Telecom RAG Startup Sequence ---"
 # We look for the 'chroma.sqlite3' file which indicates a persistent DB exists.
 DB_PATH="/app/chroma_db/chroma.sqlite3"
 
-if [ ! -f "$DB_PATH" ]; then
-    echo "⚠️  Vector Database not found at $DB_PATH."
+if [ ! -f "$DB_PATH" ] || [ "$FORCE_DB_REBUILD" = "true" ]; then
+    if [ "$FORCE_DB_REBUILD" = "true" ]; then
+        echo "🔄  FORCE_DB_REBUILD is set. Clearing existing database..."
+        rm -rf /app/chroma_db/*
+    fi
+    echo "⚠️  Vector Database not found or rebuild requested."
     echo "🛠️  Starting automatic data ingestion pipeline..."
     
     # Run the ingestion script. 
