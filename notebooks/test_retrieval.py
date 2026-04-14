@@ -20,11 +20,19 @@ def main():
     print("\n--- Phase 3: Initializing Vector Store ---")
     db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "chroma_db"))
     
-    # Make sure to clear previous testing DBs to avoid dupes across script runs
+    # Make sure to clear previous testing DBs safely (avoiding mount point errors)
     if os.path.exists(db_path):
-        import shutil
-        print(f"Clearing old DB at {db_path} for clean test...")
-        shutil.rmtree(db_path)
+        print(f"Clearing contents of old DB at {db_path} for clean test...")
+        for filename in os.listdir(db_path):
+            file_path = os.path.join(db_path, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    import shutil
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print(f"Failed to delete {file_path}. Reason: {e}")
         
     vs_manager = TelecomVectorStore(db_path=db_path)
     

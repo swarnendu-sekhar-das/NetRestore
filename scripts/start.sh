@@ -9,8 +9,9 @@ DB_PATH="/app/chroma_db/chroma.sqlite3"
 
 if [ ! -f "$DB_PATH" ] || [ "$FORCE_DB_REBUILD" = "true" ]; then
     if [ "$FORCE_DB_REBUILD" = "true" ]; then
-        echo "🔄  FORCE_DB_REBUILD is set. Clearing existing database..."
-        rm -rf /app/chroma_db/*
+        echo "🔄  FORCE_DB_REBUILD is set. Clearing existing database contents..."
+        # Safely delete contents but keep the mount-point directory
+        rm -rf /app/chroma_db/* /app/chroma_db/.* 2>/dev/null || true
     fi
     echo "⚠️  Vector Database not found or rebuild requested."
     echo "🛠️  Starting automatic data ingestion pipeline..."
