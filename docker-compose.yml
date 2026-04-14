@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  telecom-rag:
+    build: .
+    image: ${DOCKER_USER:-local}/telecom-rag:${TAG:-latest}
+    ports:
+      - "8501:8501"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    volumes:
+      # Named volume persists chroma_db across container restarts
+      - ./chroma_db:/app/chroma_db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    # Resource limits to prevent runaway containers
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
+        reservations:
+          cpus: "0.5"
+          memory: 1G
+
+volumes:
+  chroma_data:
+    driver: local

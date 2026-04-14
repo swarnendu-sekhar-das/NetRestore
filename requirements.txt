@@ -16,3 +16,6 @@ pypdf
 jupyterlab
 langchain-groq
 langchain-huggingface
+torchvision
+protobuf<4.0.0
+datasets>=2.20.0

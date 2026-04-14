@@ -40,8 +40,12 @@ def main():
             "filters": {"equipment_vendor": "Nokia"}
         },
         {
-            "prompt": "Wait, I have an alarm 404, what are the steps?",
-            "filters": {"alarm_code": "404"}
+            "prompt": "What is the procedure for BGP neighbor flapping on an Ericsson device?",
+            "filters": {"equipment_vendor": "Ericsson"}
+        },
+        {
+            "prompt": "How to resolve OSPF adjacency failure?",
+            "filters": {"equipment_vendor": "Juniper"}
         }
     ]
     

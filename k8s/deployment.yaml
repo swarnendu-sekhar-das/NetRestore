@@ -1,0 +1,93 @@
+# Kubernetes Deployment for Telecom RAG Application
+#
+# Key design decisions:
+# - RollingUpdate with maxUnavailable=0 ensures zero-downtime deployments (Live Patching)
+# - Readiness/liveness probes prevent traffic routing to unhealthy pods
+# - Vault annotations enable automatic secret injection via sidecar
+# - PVC mount ensures ChromaDB data survives pod restarts
+#
+# Replace YOUR_DOCKERHUB_USER with your actual Docker Hub username.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telecom-rag
+  namespace: telecom-rag
+  labels:
+    app: telecom-rag
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0       # Never take all pods down — zero-downtime
+      maxSurge: 1             # Spin up 1 new pod before killing the old one
+  selector:
+    matchLabels:
+      app: telecom-rag
+  template:
+    metadata:
+      labels:
+        app: telecom-rag
+      # HashiCorp Vault Agent Injector annotations
+      # These tell the Vault sidecar to inject the GROQ_API_KEY into the pod
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "telecom-rag"
+        vault.hashicorp.com/agent-inject-secret-groq: "secret/data/telecom-rag/groq"
+        vault.hashicorp.com/agent-inject-template-groq: |
+          {{- with secret "secret/data/telecom-rag/groq" -}}
+          export GROQ_API_KEY="{{ .Data.data.api_key }}"
+          {{- end -}}
+    spec:
+      containers:
+        - name: telecom-rag
+          image: YOUR_DOCKERHUB_USER/telecom-rag:latest
+          ports:
+            - containerPort: 8501
+              name: streamlit
+          # Resource requests/limits for HPA CPU-based scaling
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+          # Readiness probe: K8s won't send traffic until the pod is ready
+          readinessProbe:
+            httpGet:
+              path: /_stcore/health
+              port: 8501
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+          # Liveness probe: K8s restarts the pod if it becomes unhealthy
+          livenessProbe:
+            httpGet:
+              path: /_stcore/health
+              port: 8501
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 5
+          volumeMounts:
+            - name: chroma-storage
+              mountPath: /app/chroma_db
+      volumes:
+        - name: chroma-storage
+          persistentVolumeClaim:
+            claimName: chroma-pvc
+---
+# PersistentVolumeClaim for ChromaDB data
+# This ensures the vector database persists across pod restarts and rescheduling.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: chroma-pvc
+  namespace: telecom-rag
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

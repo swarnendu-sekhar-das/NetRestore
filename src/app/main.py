@@ -1,6 +1,9 @@
 import streamlit as st
 import os
 import sys
+import logging
+import time
+import json
 
 # Ensure the src module is in the path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
@@ -8,6 +11,19 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 from src.retrieval.vector_store import TelecomVectorStore
 from src.retrieval.hybrid_search import TelecomHybridRetriever
 from src.llm.qa_engine import ProceduralQAEngine
+from llama_index.core.memory import ChatMemoryBuffer
+
+# ---------------------------------------------------------------------------
+# Structured JSON Logging (for ELK Stack ingestion via Filebeat/Logstash)
+# ---------------------------------------------------------------------------
+logger = logging.getLogger("telecom_rag")
+if not logger.handlers:
+    logger.setLevel(logging.INFO)
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter(
+        '{"timestamp":"%(asctime)s","level":"%(levelname)s","module":"%(name)s","message":%(message)s}'
+    ))
+    logger.addHandler(handler)
 
 # Configure the Streamlit page
 st.set_page_config(
@@ -35,7 +51,8 @@ def load_qa_engine(api_key: str = None):
 st.title("📡 Procedural QA for Telecom Service Restoration")
 st.markdown("""
 This system uses Retrieval-Augmented Generation (RAG) to find and output the exact Standard Operating Procedures (SOPs) for telecom service restoration.
-It uses hybrid search and semantic chunking to ensure procedural steps are kept intact without skipping or hallucinating.
+It uses hybrid search, semantic chunking, and **chain-of-thought reasoning** to ensure procedural steps are kept intact without skipping or hallucinating.
+Follow-up questions are supported — the system maintains conversational context.
 """)
 
 
@@ -56,13 +73,34 @@ if not qa_engine:
     st.error("Vector Database not found! Please run the Phase 2/3 test scripts first to index the documents.")
     st.stop()
 
+# ---------------------------------------------------------------------------
+# Initialize Chat Memory (persists across Streamlit re-runs within a session)
+# ---------------------------------------------------------------------------
+if "chat_memory" not in st.session_state:
+    st.session_state.chat_memory = ChatMemoryBuffer.from_defaults(token_limit=3072)
+
+# Inject session-specific memory into the engine for conversational continuity
+qa_engine.set_memory(st.session_state.chat_memory)
+
 st.divider()
 
 # Sidebar for explicit Metadata Filtering (Mimicking Hybrid Keyword Search)
 st.sidebar.header("Pre-Filtering (Hybrid Search)")
 st.sidebar.markdown("Use these filters to ensure exact error codes are retrieved via Metadata Filtering, solving the issue of pure vector search missing specific model numbers.")
-vendor_filter = st.sidebar.selectbox("Equipment Vendor", ["Any", "Nokia", "Cisco", "Juniper"])
-alarm_filter = st.sidebar.text_input("Exact Alarm Code (e.g. 404, 501)", value="")
+vendor_filter = st.sidebar.selectbox(
+    "Equipment Vendor", 
+    ["Any", "Nokia", "Cisco", "Juniper", "Ericsson", "Huawei"]
+)
+VENDOR_ALARM_HINTS = {
+    "Cisco":    "Cisco codes: 301–302, 1000–1099",
+    "Nokia":    "Nokia codes: 404, 501, 1100–1199",
+    "Ericsson": "Ericsson codes: 701–702, 1300–1399",
+    "Juniper":  "Juniper codes: 601–602, 1200–1299",
+    "Huawei":   "Huawei codes: 801–802, 1400–1499",
+    "Any":      "e.g. 301, 404, 601, 701, 801, 1000",
+}
+alarm_hint = VENDOR_ALARM_HINTS.get(vendor_filter, "e.g. 1000, 1101, 1201")
+alarm_filter = st.sidebar.text_input(f"Exact Alarm Code ({alarm_hint})", value="")
 
 # Initialize chat history
 if "messages" not in st.session_state:
@@ -71,13 +109,16 @@ if "messages" not in st.session_state:
 # Add a clear chat button to the sidebar
 if st.sidebar.button("Clear Chat History", use_container_width=True):
     st.session_state.messages = []
+    st.session_state.chat_memory = ChatMemoryBuffer.from_defaults(token_limit=3072)
+    qa_engine.set_memory(st.session_state.chat_memory)
+    logger.info(json.dumps({"event": "chat_cleared"}))
     st.rerun()
 
 # Display chat history on app rerun
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
-        if "sources" in message:
+        if "sources" in message and message["sources"]:
             with st.expander("Show Retrieved Context (For Academic Evaluation)"):
                 for source in message["sources"]:
                     st.markdown(f"**Document:** `{source['file_name']}`  \n**Section Header:** `{source['header']}`  \n**Confidence Score:** `{source['score']:.2f}`")
@@ -96,22 +137,56 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
     if alarm_filter.strip():
         filters["alarm_code"] = alarm_filter.strip()
         
-    # Query Engine
+    # Query Engine with timing for structured logging
     with st.chat_message("assistant"):
-        with st.spinner("Retrieving SOPs and Synthesizing Answer..."):
+        with st.spinner("Retrieving SOPs and Synthesizing Answer (with Chain-of-Thought)..."):
             try:
+                start_time = time.time()
                 response = qa_engine.query(prompt, filters=filters if filters else None)
-                st.markdown(response.response)
+                latency = time.time() - start_time
+                
+                # Get response text (ContextChatEngine returns AgentChatResponse)
+                response_text = str(response)
+                
+                # --- Zero-results guard ---
+                num_sources = len(response.source_nodes) if hasattr(response, 'source_nodes') and response.source_nodes else 0
+                if num_sources == 0 or not response_text.strip():
+                    parts = []
+                    if alarm_filter.strip():
+                        parts.append(f"alarm code **{alarm_filter.strip()}**")
+                    if vendor_filter != "Any":
+                        parts.append(f"vendor **{vendor_filter}**")
+                    detail = " for " + " and ".join(parts) if parts else ""
+                    response_text = (
+                        f"⚠️ No matching SOP documents found{detail}.\n\n"
+                        f"**Possible reasons:**\n"
+                        f"- The alarm code may not exist in the {vendor_filter} dataset\n"
+                        f"- Try a 4-digit code (e.g. `1101`, `1201`, `1301`) instead\n"
+                        f"- Clear the alarm code filter and search by description only"
+                    )
+                
+                st.markdown(response_text)
+                
+                # Structured logging for ELK ingestion
+                logger.info(json.dumps({
+                    "event": "query_executed",
+                    "query": prompt,
+                    "vendor_filter": vendor_filter,
+                    "alarm_filter": alarm_filter,
+                    "latency_seconds": round(latency, 3),
+                    "num_sources": len(response.source_nodes) if hasattr(response, 'source_nodes') and response.source_nodes else 0,
+                    "status": "success"
+                }))
                 
                 # Extract Sources explicitly for grading
                 source_data = []
-                if response.source_nodes:
+                if hasattr(response, 'source_nodes') and response.source_nodes:
                     with st.expander("Show Retrieved Context (For Academic Evaluation)"):
                         for node in response.source_nodes:
                             file_name = node.node.metadata.get('file_name', 'Unknown')
                             header = node.node.metadata.get('header_path', 'No Header')
                             source_text = node.node.get_content()
-                            score = node.score
+                            score = node.score if node.score is not None else 0.0
                             
                             st.markdown(f"**Document:** `{file_name}`  \n**Section Header:** `{header}`  \n**Confidence Score:** `{score:.2f}`")
                             st.text(source_text[:500] + "...\n[TRUNCATED]")
@@ -124,9 +199,21 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                             })
                             
                 # Add assistant response to chat history
-                st.session_state.messages.append({"role": "assistant", "content": response.response, "sources": source_data})
+                st.session_state.messages.append({"role": "assistant", "content": response_text, "sources": source_data})
                 
             except Exception as e:
+                latency = time.time() - start_time
                 error_msg = f"**Error:** Failed to generate response. Please check your Groq API Key.\n\n`{str(e)}`"
                 st.error(error_msg)
                 st.session_state.messages.append({"role": "assistant", "content": error_msg})
+                
+                # Log the error for ELK
+                logger.error(json.dumps({
+                    "event": "query_failed",
+                    "query": prompt,
+                    "vendor_filter": vendor_filter,
+                    "alarm_filter": alarm_filter,
+                    "latency_seconds": round(latency, 3),
+                    "error": str(e),
+                    "status": "error"
+                }))

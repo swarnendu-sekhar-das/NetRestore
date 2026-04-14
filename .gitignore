@@ -37,3 +37,14 @@ ENV/
 # Project specific
 api.txt
 chroma_db/
+
+# DevOps security exclusions
+vault/
+*.pem
+*.key
+*.crt
+ansible/*.retry
+elk/data/
+*.tfstate
+*.tfstate.backup
+.terraform/
