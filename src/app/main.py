@@ -65,7 +65,12 @@ A RAG-based system designed for telecom network restoration operations by retrie
 """, unsafe_allow_html=True)
 
 
-if "GROQ_API_KEY" not in os.environ and "api_key" not in st.session_state:
+# ---------------------------------------------------------------------------
+# API Key Configuration: Prioritize Environment Variables for Automation
+# ---------------------------------------------------------------------------
+if "GROQ_API_KEY" in os.environ:
+    st.session_state.api_key = os.environ["GROQ_API_KEY"]
+elif "api_key" not in st.session_state:
     # Sidebar input for API Key if not found in env
     api_key = st.sidebar.text_input("Groq API Key (Free)", type="password")
     if not api_key:

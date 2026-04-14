@@ -26,13 +26,16 @@ RUN useradd -m -s /bin/bash appuser
 # Copy installed packages from builder stage
 COPY --from=builder /install /usr/local
 
-# Copy application code
+# Copy application code and automation scripts
 COPY src/ ./src/
 COPY data/ ./data/
 COPY notebooks/ ./notebooks/
+COPY scripts/ ./scripts/
 
-# Pre-create chroma_db directory with correct permissions
-RUN mkdir -p /app/chroma_db && chown -R appuser:appuser /app
+# Pre-create chroma_db directory and ensure script is executable
+RUN mkdir -p /app/chroma_db && \
+    chmod +x /app/scripts/start.sh && \
+    chown -R appuser:appuser /app
 
 # Health-check endpoint for K8s liveness probes and Docker healthcheck
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
@@ -44,10 +47,5 @@ EXPOSE 8501
 # Run as non-root user
 USER appuser
 
-# Streamlit CLI flags:
-# --server.headless=true : Required for Docker (no browser auto-open)
-# --server.address=0.0.0.0 : Bind to all interfaces for container networking
-ENTRYPOINT ["streamlit", "run", "src/app/main.py", \
-            "--server.port=8501", \
-            "--server.address=0.0.0.0", \
-            "--server.headless=true"]
+# Use the startup wrapper script to handle auto-initialization
+ENTRYPOINT ["/app/scripts/start.sh"]
