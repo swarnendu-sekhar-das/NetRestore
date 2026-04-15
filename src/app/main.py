@@ -44,7 +44,7 @@ def load_qa_engine(api_key: str = None):
         os.environ["GROQ_API_KEY"] = api_key
         
     vs_manager = TelecomVectorStore(db_path=db_path)
-    retriever = TelecomHybridRetriever(vector_store_manager=vs_manager, similarity_top_k=2)
+    retriever = TelecomHybridRetriever(vector_store_manager=vs_manager, similarity_top_k=10)
     return ProceduralQAEngine(retriever_pipeline=retriever)
 
 # Header Information
