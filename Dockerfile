@@ -4,12 +4,16 @@
 FROM python:3.11-slim AS builder
 
 WORKDIR /app
-COPY requirements.txt .
-# Install CPU-only torch FIRST to prevent uv from pulling 2GB+ of NVIDIA CUDA packages
+# Step 1: Install uv and heavy ML dependencies (PyTorch) first.
+# This layer is ~1GB+ and will be cached independently of your code or requirements.txt.
 RUN pip install uv && \
     uv pip install --system --prefix=/install torch torchvision \
-        --index-url https://download.pytorch.org/whl/cpu && \
-    uv pip install --system --prefix=/install -r requirements.txt
+        --index-url https://download.pytorch.org/whl/cpu
+
+# Step 2: Install application-specific requirements.
+# Changing requirements.txt now only triggers a tiny push, NOT a re-upload of torch.
+COPY requirements.txt .
+RUN uv pip install --system --prefix=/install -r requirements.txt
 
 # ---- Runtime Stage ----
 FROM python:3.11-slim
