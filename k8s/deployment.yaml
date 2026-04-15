@@ -71,13 +71,20 @@ spec:
           volumeMounts:
             - name: chroma-storage
               mountPath: /app/chroma_db
+            - name: model-storage
+              mountPath: /app/.cache/huggingface
+      # Ensure non-root appuser (UID 1000) can write to the mounted volumes
+      securityContext:
+        fsGroup: 1000
       volumes:
         - name: chroma-storage
           persistentVolumeClaim:
             claimName: chroma-pvc
+        - name: model-storage
+          persistentVolumeClaim:
+            claimName: model-pvc
 ---
 # PersistentVolumeClaim for ChromaDB data
-# This ensures the vector database persists across pod restarts and rescheduling.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -89,3 +96,18 @@ spec:
   resources:
     requests:
       storage: 5Gi
+---
+# PersistentVolumeClaim for AI Model weights
+# Decoupling models from the image allows for much smaller container images
+# and faster CI/CD pipelines.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: model-pvc
+  namespace: telecom-rag
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
