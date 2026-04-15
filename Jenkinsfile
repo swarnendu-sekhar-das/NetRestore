@@ -73,8 +73,8 @@ pipeline {
             steps {
                 sh '''
                     echo ${DOCKER_HUB_PSW} | docker login -u ${DOCKER_HUB_USR} --password-stdin
-                    docker push ${IMAGE}:${TAG}
-                    docker push ${IMAGE}:latest
+                    # Push all tags in one atomic operation — avoids second-push hang
+                    docker push --all-tags ${IMAGE}
                 '''
             }
         }

@@ -1,0 +1,29 @@
+# Python virtual environments — NEVER send to Docker (1.5GB+)
+.venv/
+.ci-env/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+*.egg-info/
+
+# Local vector database — rebuilt inside container on start
+chroma_db/
+
+# Git history — not needed in image
+.git/
+.gitignore
+
+# Dev/test artifacts
+.pytest_cache/
+notebooks/*.ipynb
+scratch/
+
+# OS artifacts
+.DS_Store
+
+# Local env files (secrets must not be baked into image)
+.env
+
+# Editor folders
+.vscode/
+.idea/
