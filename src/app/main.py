@@ -55,12 +55,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 st.markdown("""
 <h1 style='text-align: center; font-size: 45px;'>
-    Procedural QA RAG for Telecom Service Restoration
+    NetRestore: Procedural QA RAG for Telecom Fault Restoration
 </h1>
 """, unsafe_allow_html=True)
 st.markdown("""
 <p style='text-align: center; font-size: 18px;'>
-A RAG-based system designed for telecom network restoration operations by retrieving precise restoration SOPs for outages, faults, and incidents using hybrid search and LLM reasoning, enabling faster and more reliable service recovery.
+A RAG-based system designed for telecom fault restoration operations by retrieving precise restoration SOPs for outages, faults, and incidents using hybrid search and LLM reasoning, enabling faster and more reliable service recovery.
 </p>
 """, unsafe_allow_html=True)
 
