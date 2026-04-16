@@ -140,16 +140,21 @@ class ProceduralQAEngine:
 
         return "\n".join(parts)
 
-    @staticmethod
-    def _classify_query(query: str) -> str:
+    def _classify_query(self, query: str, has_memory: bool = False) -> str:
         """
         Keyword-based query routing. Zero resource cost.
+        Includes a 'conversational fallback': if memory exists, be more lenient.
 
         Returns:
             'telecom'  — query is about telecom alarms/SOPs/equipment
             'general'  — query is out-of-scope
         """
         query_lower = query.lower()
+
+        # Conversational fallback: If this is a follow-up, treat it as telecom
+        # (e.g. "and then?", "more details?", "further steps?")
+        if has_memory:
+            return "telecom"
 
         # Check if any telecom keyword appears in the query
         for keyword in TELECOM_KEYWORDS:
@@ -181,7 +186,10 @@ class ProceduralQAEngine:
         Returns a response object with .response (text) and .source_nodes (citations).
         """
         # ── Query Routing ──
-        query_type = self._classify_query(query_str)
+        # Check if we have active conversational context to bypass strict filtering
+        has_memory = self.memory is not None and len(self.memory.get_all()) > 0
+        query_type = self._classify_query(query_str, has_memory=has_memory)
+        
         if query_type == "general":
             # Return a polite out-of-scope response without wasting retrieval/LLM resources
             return _OutOfScopeResponse(OUT_OF_SCOPE_RESPONSE)

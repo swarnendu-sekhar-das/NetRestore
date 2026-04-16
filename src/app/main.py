@@ -163,8 +163,12 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                 response_text = str(response)
                 
                 # --- Zero-results guard ---
+                # For the first question, we REQUIRE retrieved sources.
+                # For follow-ups, we allow the LLM to answer from existing chat memory.
+                is_follow_up = len(st.session_state.messages) > 1
                 num_sources = len(response.source_nodes) if hasattr(response, 'source_nodes') and response.source_nodes else 0
-                if num_sources == 0 or not response_text.strip():
+                
+                if (num_sources == 0 and not is_follow_up) or not response_text.strip():
                     parts = []
                     if alarm_filter.strip():
                         parts.append(f"alarm code **{alarm_filter.strip()}**")
