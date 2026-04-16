@@ -6,7 +6,7 @@ import os
 
 class TelecomVectorStore:
     """
-    Manages the local ChromaDB vector store and index for processed telecom documents.
+    Manages the local ChromaDB vector store and index for processed network documents.
     """
     
     def __init__(self, db_path: str = "./chroma_db", collection_name: str = "telecom_sops"):

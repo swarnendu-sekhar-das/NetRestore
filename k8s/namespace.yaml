@@ -1,3 +1,13 @@
+# Kubernetes Namespace Configuration
+#
+# This manifest creates a dedicated namespace for the NetRestore application,
+# providing logical isolation of resources within the Kubernetes cluster.
+#
+# Namespace: telecom-rag
+# Environment: production
+#
+# Apply with: kubectl apply -f k8s/namespace.yaml
+
 apiVersion: v1
 kind: Namespace
 metadata:

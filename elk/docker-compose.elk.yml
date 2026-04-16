@@ -1,4 +1,4 @@
-# ELK Stack (Elasticsearch + Logstash + Kibana) for Telecom RAG Monitoring
+# ELK Stack (Elasticsearch + Logstash + Kibana) for NetRestore Monitoring
 #
 # This is a SEPARATE Docker Compose stack from the main application.
 # Run with: docker compose -f docker-compose.elk.yml up -d
@@ -9,7 +9,7 @@
 #   Logstash:       tcp://localhost:5044 (Beats input for Filebeat)
 #
 # Kibana Dashboard panels to create:
-#   1. Query Volume: Line chart of query count over time (index: telecom-rag-logs-*)
+#   1. Query Volume: Line chart of query count over time (index: netrestore-logs-*)
 #   2. Average Latency: Gauge showing mean latency_seconds
 #   3. Vendor Distribution: Pie chart of vendor_filter values
 #   4. Failure Rate: Percentage of status=error events

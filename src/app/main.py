@@ -16,7 +16,7 @@ from llama_index.core.memory import ChatMemoryBuffer
 # ---------------------------------------------------------------------------
 # Structured JSON Logging (for ELK Stack ingestion via Filebeat/Logstash)
 # ---------------------------------------------------------------------------
-logger = logging.getLogger("telecom_rag")
+logger = logging.getLogger("netrestore")
 if not logger.handlers:
     logger.setLevel(logging.INFO)
     handler = logging.StreamHandler()
@@ -27,7 +27,7 @@ if not logger.handlers:
 
 # Configure the Streamlit page
 st.set_page_config(
-    page_title="Telecom QA RAG",
+    page_title="NetRestore",
     page_icon="📡",
     layout="wide",
 )
@@ -55,12 +55,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 st.markdown("""
 <h1 style='text-align: center; font-size: 45px;'>
-    NetRestore: Procedural QA RAG for Telecom Fault Restoration
+    NetRestore: Procedural QA RAG for Network Fault Restoration
 </h1>
 """, unsafe_allow_html=True)
 st.markdown("""
 <p style='text-align: center; font-size: 18px;'>
-A RAG-based system designed for telecom fault restoration operations by retrieving precise restoration SOPs for outages, faults, and incidents using hybrid search and LLM reasoning, enabling faster and more reliable service recovery.
+A RAG-based system designed for network fault restoration operations by retrieving precise restoration SOPs for outages, faults, and incidents using hybrid search and LLM reasoning, enabling faster and more reliable service recovery.
 </p>
 """, unsafe_allow_html=True)
 

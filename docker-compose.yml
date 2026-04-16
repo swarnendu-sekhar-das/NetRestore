@@ -1,9 +1,9 @@
 version: "3.9"
 
 services:
-  telecom-rag:
+  netrestore:
     build: .
-    image: ${DOCKER_USER:-local}/telecom-rag:${TAG:-latest}
+    image: ${DOCKER_USER:-local}/netrestore:${TAG:-latest}
     ports:
       - "8501:8501"
     environment:

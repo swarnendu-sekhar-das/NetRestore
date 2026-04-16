@@ -1,4 +1,4 @@
-# Kubernetes Service for Telecom RAG Application
+# Kubernetes Service for NetRestore Application
 # Exposes the Streamlit app on NodePort 30501 for external access.
 # For cloud deployments, consider changing to type: LoadBalancer.
 

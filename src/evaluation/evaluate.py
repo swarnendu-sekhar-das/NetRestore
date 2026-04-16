@@ -1,7 +1,7 @@
 """
 RAG Evaluation Script with Ground Truth Metrics.
 
-Evaluates the Telecom RAG pipeline against ground truth Q&A pairs
+Evaluates the NetRestore RAG pipeline against ground truth Q&A pairs
 using both retrieval metrics and generation quality metrics.
 
 Metrics computed:
@@ -199,7 +199,7 @@ def evaluate_generation(qa_engine: ProceduralQAEngine, qa_pairs: list[dict]) -> 
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Evaluate Telecom RAG Pipeline")
+    parser = argparse.ArgumentParser(description="Evaluate NetRestore RAG Pipeline")
     parser.add_argument("--skip-llm", action="store_true",
                         help="Skip LLM generation evaluation (retrieval metrics only)")
     args = parser.parse_args()

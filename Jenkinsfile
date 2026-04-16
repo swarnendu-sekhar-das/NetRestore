@@ -1,5 +1,5 @@
 /*
- * Declarative Jenkins Pipeline for Telecom RAG CI/CD
+ * Declarative Jenkins Pipeline for NetRestore CI/CD
  *
  * Stages:
  *   1. Checkout      - Pull source from GitHub

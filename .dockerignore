@@ -1,4 +1,13 @@
-# Python virtual environments — NEVER send to Docker (1.5GB+)
+# ============================================================================
+# Docker Ignore Configuration for NetRestore Project
+# ============================================================================
+# This file specifies files and directories to exclude from Docker build context.
+# Excluding unnecessary files reduces build time and image size.
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# Python Virtual Environments (1.5GB+ - NEVER include in Docker context)
+# ---------------------------------------------------------------------------
 .venv/
 .ci-env/
 **/__pycache__/
@@ -6,24 +15,37 @@
 **/*.pyo
 *.egg-info/
 
-# Local vector database — rebuilt inside container on start
+# ---------------------------------------------------------------------------
+# Local Vector Database (rebuilt inside container on first start)
+# ---------------------------------------------------------------------------
 chroma_db/
 
-# Git history — not needed in image
+# ---------------------------------------------------------------------------
+# Git History (not needed in production image)
+# ---------------------------------------------------------------------------
 .git/
 .gitignore
 
-# Dev/test artifacts
+# ---------------------------------------------------------------------------
+# Development and Test Artifacts
+# ---------------------------------------------------------------------------
 .pytest_cache/
 notebooks/*.ipynb
 scratch/
 
-# OS artifacts
-.DS_Store
+# ---------------------------------------------------------------------------
+# Operating System Artifacts
+# ---------------------------------------------------------------------------
+.DS_Store     # macOS
+Thumbs.db     # Windows
 
-# Local env files (secrets must not be baked into image)
+# ---------------------------------------------------------------------------
+# Security: Local Environment Files (secrets must not be baked into image)
+# ---------------------------------------------------------------------------
 .env
 
-# Editor folders
+# ---------------------------------------------------------------------------
+# Editor and IDE Configuration
+# ---------------------------------------------------------------------------
 .vscode/
 .idea/

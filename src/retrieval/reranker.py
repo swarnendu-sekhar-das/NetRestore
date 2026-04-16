@@ -1,5 +1,5 @@
 """
-Cross-Encoder Reranker for Telecom RAG Pipeline.
+Cross-Encoder Reranker for NetRestore RAG Pipeline.
 
 Uses a lightweight cross-encoder model (ms-marco-MiniLM-L-6-v2, ~80MB) to
 rerank candidate documents after initial retrieval.  Cross-encoders process

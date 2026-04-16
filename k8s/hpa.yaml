@@ -1,4 +1,4 @@
-# Horizontal Pod Autoscaler for Telecom RAG
+# Horizontal Pod Autoscaler for NetRestore
 #
 # Automatically scales pods between 1 and 5 replicas based on CPU utilization.
 # When CPU exceeds 70% (e.g., multiple engineers querying during an outage),

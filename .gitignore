@@ -1,4 +1,13 @@
-# Python
+# ============================================================================
+# Git Ignore Configuration for NetRestore Project
+# ============================================================================
+# This file specifies intentionally untracked files that Git should ignore.
+# Patterns are grouped by category for maintainability.
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# Python Build Artifacts
+# ---------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
@@ -21,30 +30,42 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual environments
-.env
+# ---------------------------------------------------------------------------
+# Virtual Environments
+# ---------------------------------------------------------------------------
+.env          # Local environment variables (contains secrets)
 .venv
 env/
 venv/
 ENV/
+.ci-env/      # CI/CD temporary environment
 
-# Jupyter Notebook
+# ---------------------------------------------------------------------------
+# Jupyter Notebook Checkpoints
+# ---------------------------------------------------------------------------
 .ipynb_checkpoints
 
-# Mac OS
-.DS_Store
+# ---------------------------------------------------------------------------
+# Operating System Artifacts
+# ---------------------------------------------------------------------------
+.DS_Store     # macOS
+Thumbs.db     # Windows
 
-# Project specific
-api.txt
-chroma_db/
+# ---------------------------------------------------------------------------
+# Project-Specific Artifacts
+# ---------------------------------------------------------------------------
+api.txt       # API keys (should be in .env)
+chroma_db/    # Local vector database (rebuilt in container)
 
-# DevOps security exclusions
-vault/
-*.pem
-*.key
-*.crt
-ansible/*.retry
-elk/data/
-*.tfstate
+# ---------------------------------------------------------------------------
+# DevOps Security Exclusions
+# ---------------------------------------------------------------------------
+vault/        # HashiCorp Vault secrets
+*.pem         # Private keys
+*.key         # Key files
+*.crt         # Certificates
+ansible/*.retry  # Ansible retry files
+elk/data/     # ELK stack persistent data
+*.tfstate     # Terraform state files
 *.tfstate.backup
 .terraform/

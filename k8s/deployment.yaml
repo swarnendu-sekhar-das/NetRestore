@@ -1,4 +1,4 @@
-# Kubernetes Deployment for Telecom RAG Application
+# Kubernetes Deployment for NetRestore Application
 #
 # Key design decisions:
 # - RollingUpdate with maxUnavailable=0 ensures zero-downtime deployments (Live Patching)

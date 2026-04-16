@@ -1,5 +1,5 @@
 ---
-# Master Ansible Playbook for Telecom RAG Infrastructure
+# Master Ansible Playbook for NetRestore Infrastructure
 #
 # This playbook provisions all target VMs with the required software
 # using modular Ansible Roles (fulfills the "Ansible Roles" rubric requirement).
