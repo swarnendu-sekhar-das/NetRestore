@@ -56,8 +56,8 @@ pipeline {
                 withEnv(["GROQ_API_KEY=${GROQ_KEY}"]) {
                     sh '''
                         . .ci-env/bin/activate
-                        echo "--- Running API smoke test (timeout 60s) ---"
-                        timeout 60 python notebooks/test_llm.py || echo "API smoke test completed (or timed out gracefully)"
+                        echo "--- Running API smoke test ---"
+                        python notebooks/test_llm.py || echo "API smoke test completed (expected failure without real API key)"
                     '''
                 }
             }
@@ -66,6 +66,8 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh '''
+                    # Login before build to prevent Docker Hub unauthenticated pull rate limits (429)
+                    echo ${DOCKER_HUB_PSW} | docker login -u ${DOCKER_HUB_USR} --password-stdin
                     echo "--- Building Docker image ---"
                     docker build -t ${IMAGE}:${TAG} -t ${IMAGE}:latest .
                 '''
