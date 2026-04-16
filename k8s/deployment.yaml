@@ -7,6 +7,11 @@
 # - PVC mount ensures ChromaDB data survives pod restarts
 #
 # Replace YOUR_DOCKERHUB_USER with your actual Docker Hub username.
+#
+# Secret prerequisite — run once before applying this manifest:
+#   kubectl create secret generic telecom-rag-secret \
+#     --from-literal=groq-api-key='YOUR_GROQ_KEY' \
+#     -n telecom-rag
 
 apiVersion: apps/v1
 kind: Deployment
@@ -16,7 +21,7 @@ metadata:
   labels:
     app: telecom-rag
 spec:
-  replicas: 2
+  replicas: 1   # ChromaDB (embedded RWO PVC) only supports single-writer; HPA handles scale-out
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -41,9 +46,15 @@ spec:
               name: streamlit
           env:
             - name: GROQ_API_KEY
-              value: "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"
-            - name: FORCE_DB_REBUILD
-              value: "true"
+              valueFrom:
+                secretKeyRef:
+                  name: telecom-rag-secret
+                  key: groq-api-key
+            # FORCE_DB_REBUILD is intentionally omitted here.
+            # To trigger a one-off rebuild, run:
+            #   kubectl set env deployment/telecom-rag FORCE_DB_REBUILD=true -n telecom-rag
+            # Then clear it after rebuild:
+            #   kubectl set env deployment/telecom-rag FORCE_DB_REBUILD- -n telecom-rag
           # Resource requests/limits for HPA CPU-based scaling
           resources:
             requests:

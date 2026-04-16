@@ -36,7 +36,7 @@ pipeline {
         stage('Lint & Unit Test') {
             steps {
                 sh '''
-                    /opt/homebrew/bin/python3.11 -m venv .ci-env
+                    python3.11 -m venv .ci-env || python3 -m venv .ci-env
                     . .ci-env/bin/activate
                     pip install uv
                     uv pip install -r requirements.txt
@@ -51,12 +51,15 @@ pipeline {
 
         stage('Integration Test (API Smoke)') {
             steps {
-                sh '''
-                    . .ci-env/bin/activate
-                    export GROQ_API_KEY=${GROQ_KEY}
-                    echo "--- Running API smoke test (timeout 60s) ---"
-                    timeout 60 python notebooks/test_llm.py || echo "API smoke test completed (or timed out gracefully)"
-                '''
+                // Use withEnv so ${GROQ_KEY} is correctly expanded into the shell env.
+                // Single-quote sh blocks do NOT interpolate Groovy variables.
+                withEnv(["GROQ_API_KEY=${GROQ_KEY}"]) {
+                    sh '''
+                        . .ci-env/bin/activate
+                        echo "--- Running API smoke test (timeout 60s) ---"
+                        timeout 60 python notebooks/test_llm.py || echo "API smoke test completed (or timed out gracefully)"
+                    '''
+                }
             }
         }
 
@@ -73,7 +76,6 @@ pipeline {
             steps {
                 sh '''
                     echo ${DOCKER_HUB_PSW} | docker login -u ${DOCKER_HUB_USR} --password-stdin
-                    # Push all tags in one atomic operation — avoids second-push hang
                     docker push --all-tags ${IMAGE}
                 '''
             }
@@ -91,7 +93,7 @@ pipeline {
                     kubectl set image deployment/telecom-rag \
                         telecom-rag=${IMAGE}:${TAG} \
                         -n telecom-rag || \
-                        echo "⚠️  K8s deploy skipped — apply manifests first: kubectl apply -f k8s/"
+                        echo "K8s deploy skipped — apply manifests first: kubectl apply -f k8s/"
                     kubectl rollout status deployment/telecom-rag \
                         -n telecom-rag \
                         --timeout=120s || true
@@ -102,12 +104,12 @@ pipeline {
 
     post {
         failure {
-            echo "❌ Pipeline FAILED at stage: ${env.STAGE_NAME}"
+            echo "Pipeline FAILED at stage: ${env.STAGE_NAME}"
             // Optional: Add Slack or email notification here
             // slackSend channel: '#devops', message: "Build ${BUILD_NUMBER} failed at ${env.STAGE_NAME}"
         }
         success {
-            echo "✅ Pipeline succeeded! Image ${IMAGE}:${TAG} deployed to K8s."
+            echo "Pipeline succeeded! Image ${IMAGE}:${TAG} deployed to K8s."
         }
         always {
             sh 'docker logout || true'

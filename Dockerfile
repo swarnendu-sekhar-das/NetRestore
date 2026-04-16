@@ -4,16 +4,16 @@
 FROM python:3.11-slim AS builder
 
 WORKDIR /app
-# Step 1: Install uv and heavy ML dependencies (PyTorch) first.
-# This layer is ~1GB+ and will be cached independently of your code or requirements.txt.
-RUN pip install uv && \
-    uv pip install --system --prefix=/install torch torchvision \
+# Step 1: Install uv, then install heavy ML dependencies (PyTorch) via the CPU-only index.
+# This layer is ~1GB+ and cached independently of your code or requirements.txt.
+RUN pip install --no-cache-dir uv && \
+    uv pip install --system torch torchvision \
         --index-url https://download.pytorch.org/whl/cpu
 
 # Step 2: Install application-specific requirements.
-# Changing requirements.txt now only triggers a tiny push, NOT a re-upload of torch.
+# Changing requirements.txt triggers only a small layer rebuild, NOT a re-download of torch.
 COPY requirements.txt .
-RUN uv pip install --system --prefix=/install -r requirements.txt
+RUN uv pip install --system -r requirements.txt
 
 # ---- Runtime Stage ----
 FROM python:3.11-slim
@@ -27,8 +27,9 @@ WORKDIR /app
 # Create non-root user for security (Vault/K8s best practice)
 RUN useradd -m -s /bin/bash appuser
 
-# Copy installed packages from builder stage
-COPY --from=builder /install /usr/local
+# Copy installed packages from builder stage (entire local Python env)
+COPY --from=builder /usr/local/lib /usr/local/lib
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy application code and automation scripts
 COPY src/ ./src/

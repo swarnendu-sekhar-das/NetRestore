@@ -17,6 +17,7 @@ pypdf
 jupyterlab
 langchain-groq
 langchain-huggingface
-torchvision
-protobuf<4.0.0
+# torchvision is installed via the Dockerfile CPU-only wheel index (--index-url pytorch.org)
+# Do NOT add it here — pip/uv would pull in CUDA-heavy builds from PyPI instead.
+protobuf>=4.0.0,<6.0.0  # chromadb 0.4+ requires protobuf>=4; cap at 6 for safety
 datasets>=2.20.0

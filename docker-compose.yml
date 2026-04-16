@@ -17,16 +17,11 @@ services:
       timeout: 5s
       retries: 3
     restart: unless-stopped
-    # Resource limits to prevent runaway containers
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: 4G
-        reservations:
-          cpus: "0.5"
-          memory: 1G
+    # Resource limits — top-level keys work in standalone `docker compose up`.
+    # (deploy.resources is Swarm-only and silently ignored without `docker stack deploy`.)
+    mem_limit: 4g
+    memswap_limit: 4g
+    cpus: "2.0"
 
-volumes:
-  chroma_data:
-    driver: local
+# No separate named volume needed — chroma_db is a bind-mount (./chroma_db:/app/chroma_db)
+# which persists data in the host directory automatically.

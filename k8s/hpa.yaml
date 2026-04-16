@@ -19,7 +19,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: telecom-rag
-  minReplicas: 1
+  minReplicas: 1   # Matches deployment baseline; RWO PVC limits to single-writer pod
   maxReplicas: 5
   metrics:
     - type: Resource

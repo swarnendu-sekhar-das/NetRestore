@@ -11,7 +11,7 @@
     force: no
 
 - name: Verify kubectl installation
-  command: kubectl version --client --short
+  command: kubectl version --client  # --short was removed in kubectl v1.28+
   register: kubectl_version
   changed_when: false
   ignore_errors: yes
