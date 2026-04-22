@@ -32,6 +32,152 @@ st.set_page_config(
     layout="wide",
 )
 
+# Custom CSS for professional styling
+st.markdown("""
+<style>
+    /* Global Styles */
+    .main {
+        background-color: #f8f9fa;
+    }
+    
+    /* Header Styling */
+    .header-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem 3rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header-title {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-align: center;
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .header-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        text-align: center;
+        margin-top: 1rem;
+        line-height: 1.6;
+    }
+    
+    .header-icon {
+        font-size: 4rem;
+        text-align: center;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Sidebar Styling */
+    .css-1d391kg {
+        background-color: #ffffff;
+    }
+    
+    .sidebar-title {
+        color: #667eea;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    /* Chat Message Styling */
+    .stChatMessage {
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+    
+    /* Button Styling */
+    .stButton > button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* Input Styling */
+    .stTextInput > div > div > input {
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+        padding: 0.75rem;
+        transition: border-color 0.3s ease;
+    }
+    
+    .stTextInput > div > div > input:focus {
+        border-color: #667eea;
+        outline: none;
+    }
+    
+    /* Selectbox Styling */
+    .stSelectbox > div > div > select {
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+        padding: 0.75rem;
+    }
+    
+    /* Expander Styling */
+    .streamlit-expanderHeader {
+        background-color: #f1f5f9;
+        border-radius: 8px;
+        padding: 0.75rem;
+        font-weight: 600;
+        color: #475569;
+    }
+    
+    /* Success/Error Messages */
+    .stSuccess {
+        background-color: #dcfce7;
+        border-left: 4px solid #22c55e;
+        padding: 1rem;
+        border-radius: 8px;
+    }
+    
+    .stError {
+        background-color: #fee2e2;
+        border-left: 4px solid #ef4444;
+        padding: 1rem;
+        border-radius: 8px;
+    }
+    
+    .stWarning {
+        background-color: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        padding: 1rem;
+        border-radius: 8px;
+    }
+    
+    /* Info Messages */
+    .stInfo {
+        background-color: #dbeafe;
+        border-left: 4px solid #3b82f6;
+        padding: 1rem;
+        border-radius: 8px;
+    }
+    
+    /* Footer Styling */
+    .footer {
+        text-align: center;
+        padding: 2rem;
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-top: 3rem;
+        border-top: 1px solid #e2e8f0;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Initialize the QA Engine once and store it in session state
 @st.cache_resource
 def load_qa_engine(api_key: str = None):
@@ -49,19 +195,13 @@ def load_qa_engine(api_key: str = None):
 
 # Header Information
 st.markdown("""
-<h1 style='text-align: center;'>
-    <span style='font-size: 60px;'>📡</span> 
-</h1>
-""", unsafe_allow_html=True)
-st.markdown("""
-<h1 style='text-align: center; font-size: 45px;'>
-    NetRestore: Procedural QA RAG for Network Fault Restoration
-</h1>
-""", unsafe_allow_html=True)
-st.markdown("""
-<p style='text-align: center; font-size: 18px;'>
-A RAG-based system designed for network fault restoration operations by retrieving precise restoration SOPs for outages, faults, and incidents using hybrid search and LLM reasoning, enabling faster and more reliable service recovery.
-</p>
+<div class="header-container">
+    <div class="header-icon">📡</div>
+    <h1 class="header-title">NetRestore: Procedural QA RAG for Network Fault Restoration</h1>
+    <p class="header-subtitle">
+        A RAG-based system designed for network fault restoration operations by retrieving precise restoration SOPs for outages, faults, and incidents using hybrid search and LLM reasoning, enabling faster and more reliable service recovery.
+    </p>
+</div>
 """, unsafe_allow_html=True)
 
 
@@ -99,11 +239,14 @@ qa_engine.set_memory(st.session_state.chat_memory)
 st.divider()
 
 # Sidebar for explicit Metadata Filtering (Mimicking Hybrid Keyword Search)
-st.sidebar.header("Pre-Filtering (Hybrid Search)")
+st.sidebar.markdown('<h2 class="sidebar-title">⚙️ Configuration</h2>', unsafe_allow_html=True)
+st.sidebar.markdown("---")
+st.sidebar.markdown('<h3 class="sidebar-title">🔍 Pre-Filtering</h3>', unsafe_allow_html=True)
 st.sidebar.markdown("Use these filters to ensure exact error codes are retrieved via Metadata Filtering, solving the issue of pure vector search missing specific model numbers.")
 vendor_filter = st.sidebar.selectbox(
     "Equipment Vendor", 
-    ["Any", "Nokia", "Cisco", "Juniper", "Ericsson", "Huawei"]
+    ["Any", "Nokia", "Cisco", "Juniper", "Ericsson", "Huawei"],
+    label_visibility="visible"
 )
 VENDOR_ALARM_HINTS = {
     "Cisco":    "Cisco codes: 301–302, 1000–1099",
@@ -114,14 +257,15 @@ VENDOR_ALARM_HINTS = {
     "Any":      "e.g. 301, 404, 601, 701, 801, 1000",
 }
 alarm_hint = VENDOR_ALARM_HINTS.get(vendor_filter, "e.g. 1000, 1101, 1201")
-alarm_filter = st.sidebar.text_input(f"Exact Alarm Code ({alarm_hint})", value="")
+alarm_filter = st.sidebar.text_input(f"Exact Alarm Code ({alarm_hint})", value="", help="Enter the exact alarm code for precise filtering")
 
 # Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # Add a clear chat button to the sidebar
-if st.sidebar.button("Clear Chat History", use_container_width=True):
+st.sidebar.markdown("---")
+if st.sidebar.button("🗑️ Clear Chat History", use_container_width=True, type="secondary"):
     st.session_state.messages = []
     st.session_state.chat_memory = ChatMemoryBuffer.from_defaults(token_limit=3072)
     qa_engine.set_memory(st.session_state.chat_memory)
@@ -133,10 +277,13 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
         if "sources" in message and message["sources"]:
-            with st.expander("Show Retrieved Context (For Academic Evaluation)"):
-                for source in message["sources"]:
+            with st.expander("📄 Show Retrieved Context (For Academic Evaluation)", expanded=False):
+                for idx, source in enumerate(message["sources"], 1):
+                    st.markdown(f"### Source {idx}")
                     st.markdown(f"**Document:** `{source['file_name']}`  \n**Section Header:** `{source['header']}`  \n**Confidence Score:** `{source['score']:.2f}`")
                     st.text(source['text'])
+                    if idx < len(message["sources"]):
+                        st.markdown("---")
 
 # React to user input
 if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM_CODE_404 on router XYZ?'): "):
@@ -199,15 +346,18 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                 # Extract Sources explicitly for grading
                 source_data = []
                 if hasattr(response, 'source_nodes') and response.source_nodes:
-                    with st.expander("Show Retrieved Context (For Academic Evaluation)"):
-                        for node in response.source_nodes:
+                    with st.expander("📄 Show Retrieved Context (For Academic Evaluation)", expanded=False):
+                        for idx, node in enumerate(response.source_nodes, 1):
                             file_name = node.node.metadata.get('file_name', 'Unknown')
                             header = node.node.metadata.get('header_path', 'No Header')
                             source_text = node.node.get_content()
                             score = node.score if node.score is not None else 0.0
                             
+                            st.markdown(f"### Source {idx}")
                             st.markdown(f"**Document:** `{file_name}`  \n**Section Header:** `{header}`  \n**Confidence Score:** `{score:.2f}`")
                             st.text(source_text[:500] + "...\n[TRUNCATED]")
+                            if idx < len(response.source_nodes):
+                                st.markdown("---")
                             
                             source_data.append({
                                 "file_name": file_name,
@@ -235,3 +385,12 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                     "error": str(e),
                     "status": "error"
                 }))
+
+# Professional Footer
+st.markdown("""
+<div class="footer">
+    <p><strong>NetRestore</strong> - AI-Powered Network Fault Restoration System</p>
+    <p>Built with Streamlit • RAG Architecture • Hybrid Search</p>
+    <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #94a3b8;">© 2024 NetRestore. All rights reserved.</p>
+</div>
+""", unsafe_allow_html=True)
