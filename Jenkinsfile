@@ -78,7 +78,8 @@ pipeline {
             steps {
                 sh '''
                     echo ${DOCKER_HUB_PSW} | docker login -u ${DOCKER_HUB_USR} --password-stdin
-                    docker push --all-tags ${IMAGE}
+                    docker push ${IMAGE}:${TAG}
+                    docker push ${IMAGE}:latest
                 '''
             }
         }
