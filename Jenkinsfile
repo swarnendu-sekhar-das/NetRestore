@@ -49,7 +49,7 @@ pipeline {
             }
         }
 
-        stage('Integration Test (API Smoke)') {
+        stage('Integration Test') {
             steps {
                 // Use withEnv so ${GROQ_KEY} is correctly expanded into the shell env.
                 // Single-quote sh blocks do NOT interpolate Groovy variables.
