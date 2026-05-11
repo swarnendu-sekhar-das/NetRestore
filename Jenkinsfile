@@ -78,16 +78,7 @@ pipeline {
             steps {
                 sh '''
                     echo ${DOCKER_HUB_PSW} | docker login -u ${DOCKER_HUB_USR} --password-stdin
-                    # Retry logic for Docker Hub push failures (rate limits, network issues)
-                    for i in 1 2 3; do
-                        if docker push --all-tags ${IMAGE}; then
-                            echo "Docker push succeeded on attempt $i"
-                            break
-                        else
-                            echo "Docker push failed on attempt $i, retrying..."
-                            sleep 10
-                        fi
-                    done
+                    docker push --all-tags ${IMAGE}
                 '''
             }
         }
