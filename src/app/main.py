@@ -386,11 +386,3 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                     "status": "error"
                 }))
 
-# Professional Footer
-st.markdown("""
-<div class="footer">
-    <p><strong>NetRestore</strong> - AI-Powered Network Fault Restoration System</p>
-    <p>Built with Streamlit • RAG Architecture • Hybrid Search</p>
-    <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #94a3b8;">© 2024 NetRestore. All rights reserved.</p>
-</div>
-""", unsafe_allow_html=True)
