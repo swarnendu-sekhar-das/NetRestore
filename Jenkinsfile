@@ -7,12 +7,12 @@
  *   3. API Smoke     - Quick integration test against Groq API
  *   4. Docker Build  - Multi-stage Docker image build
  *   5. Docker Push   - Push to Docker Hub (tagged + latest)
- *   6. Deploy to K8s - Rolling update on Kubernetes deployment
+ *   6. Deploy        - Deploy via Docker Compose (pull + up -d)
  *
  * Prerequisites:
  *   - Jenkins credentials: 'dockerhub-creds' (Username/Password)
  *   - Jenkins credentials: 'groq-api-key' (Secret text)
- *   - kubectl configured on Jenkins agent
+ *   - Docker and Docker Compose installed on Jenkins agent
  *   - GitHub Webhook pointing to http://<JENKINS_IP>:8080/github-webhook/
  */
 

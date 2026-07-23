@@ -14,7 +14,7 @@ from src.llm.qa_engine import ProceduralQAEngine
 from llama_index.core.memory import ChatMemoryBuffer
 
 # ---------------------------------------------------------------------------
-# Structured JSON Logging (for ELK Stack ingestion via Filebeat/Logstash)
+# Structured JSON Logging (production-ready format for centralized log aggregation)
 # ---------------------------------------------------------------------------
 logger = logging.getLogger("netrestore")
 if not logger.handlers:
@@ -329,7 +329,7 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                 
                 st.markdown(response_text)
                 
-                # Structured logging for ELK ingestion
+                # Structured logging for observability
                 logger.info(json.dumps({
                     "event": "query_executed",
                     "query": prompt,
@@ -372,7 +372,7 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                 st.error(error_msg)
                 st.session_state.messages.append({"role": "assistant", "content": error_msg})
                 
-                # Log the error for ELK
+                # Log the error for observability
                 logger.error(json.dumps({
                     "event": "query_failed",
                     "query": prompt,

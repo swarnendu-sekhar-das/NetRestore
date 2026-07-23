@@ -28,7 +28,7 @@ class TelecomVectorStore:
     def insert_nodes(self, nodes):
         """
         Takes LlamaIndex nodes (structural chunks) and indexes them into ChromaDB
-        using the BAAI embedding model.
+        using the HuggingFace embedding model.
         """
         print(f"Indexing {len(nodes)} chunks into ChromaDB at {self.db_path}...")
         self.index = VectorStoreIndex(

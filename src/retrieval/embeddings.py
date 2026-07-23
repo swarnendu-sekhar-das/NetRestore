@@ -2,7 +2,7 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
 def get_embedding_model():
     """
-    Initializes and returns the BAAI/bge-m3 embedding model.
+    Initializes and returns the all-MiniLM-L6-v2 embedding model.
     This model runs locally and is open-source.
     """
     # Using a deeply optimized local embedding model to prevent RAM OOM crashes.

@@ -18,13 +18,13 @@ RUN uv pip install --system -r requirements.txt
 # ---- Runtime Stage ----
 FROM python:3.11-slim
 
-# Install curl for health checks (required by K8s liveness/readiness probes)
+# Install curl for Docker healthchecks
 RUN apt-get update && apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Create non-root user for security (Vault/K8s best practice)
+# Create non-root user for security (container best practice)
 RUN useradd -m -s /bin/bash appuser
 
 # Copy installed packages from builder stage (entire local Python env)
@@ -45,7 +45,7 @@ RUN mkdir -p /app/chroma_db && \
     chmod +x /app/scripts/start.sh && \
     chown -R appuser:appuser /app
 
-# Health-check endpoint for K8s liveness probes and Docker healthcheck
+# Health-check endpoint for Docker healthcheck
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
   CMD curl -f http://localhost:8501/_stcore/health || exit 1
 

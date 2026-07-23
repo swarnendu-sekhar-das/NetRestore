@@ -65,8 +65,12 @@ vault/        # HashiCorp Vault secrets
 *.pem         # Private keys
 *.key         # Key files
 *.crt         # Certificates
-ansible/*.retry  # Ansible retry files
-elk/data/     # ELK stack persistent data
 *.tfstate     # Terraform state files
 *.tfstate.backup
 .terraform/
+
+# ---------------------------------------------------------------------------
+# Development Artifacts (not for production repo)
+# ---------------------------------------------------------------------------
+scratch/              # Debug/scratch scripts
+evaluation_results.json  # Generated at runtime by evaluate.py
