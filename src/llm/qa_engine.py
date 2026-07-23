@@ -1,12 +1,8 @@
 """
-Procedural QA Engine with Topology-Aware Reasoning and Query Routing.
+QA Engine
 
-This is the central orchestration class that ties together:
-  - Hybrid retrieval (BM25 + vector + reranker)
-  - Network topology injection (cascade analysis)
-  - Query routing (in-scope vs out-of-scope)
-  - Chat memory (conversational continuity)
-  - LLM generation with chain-of-thought reasoning
+This class connects the search engine, the network topology,
+and the LLM to answer user questions.
 """
 
 import os
@@ -30,27 +26,13 @@ from src.llm.prompts import (
 
 class ProceduralQAEngine:
     """
-    Ties together the Hybrid Retriever, Chat Memory, Network Topology,
-    and the LLM into a cohesive conversational QA pipeline with
-    chain-of-thought reasoning and query routing.
-
-    Supports two modes:
-    - Conversational (default): Uses ContextChatEngine with ChatMemoryBuffer for
-      multi-turn chat with CoT reasoning. Follow-up questions are contextual.
-    - Legacy/stateless: Falls back to RetrieverQueryEngine for single-shot QA
-      (used by test scripts).
+    Main class that connects the search, database, and LLM together 
+    to answer questions while keeping chat history.
     """
 
     def __init__(self, retriever_pipeline, router, topology_service, llm, token_limit: int = 3072):
         """
-        Expects dependencies to be injected (Dependency Inversion Principle).
-        
-        Args:
-            retriever_pipeline: TelecomHybridRetriever instance
-            router: SemanticRouter instance
-            topology_service: NetworkTopologyService instance
-            llm: Generator instance
-            token_limit: Maximum tokens for the chat memory sliding window.
+        Initialize the QA engine with all required components.
         """
         self.retriever = retriever_pipeline
         self.router = router

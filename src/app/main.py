@@ -16,9 +16,7 @@ from src.llm.topology import NetworkTopologyService
 from src.llm.generator import get_llm_generator
 from llama_index.core.memory import ChatMemoryBuffer
 
-# ---------------------------------------------------------------------------
-# Structured JSON Logging (production-ready format for centralized log aggregation)
-# ---------------------------------------------------------------------------
+# Configure JSON logging
 logger = logging.getLogger("netrestore")
 if not logger.handlers:
     logger.setLevel(logging.INFO)
@@ -181,7 +179,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize the QA Engine once and store it in session state
+# Initialize the QA Engine
 @st.cache_resource
 def load_qa_engine(api_key: str = None):
     db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "chroma_db"))
@@ -217,13 +215,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# ---------------------------------------------------------------------------
-# API Key Configuration: Prioritize Environment Variables for Automation
-# ---------------------------------------------------------------------------
+# API Key Configuration
 if "GROQ_API_KEY" in os.environ:
     st.session_state.api_key = os.environ["GROQ_API_KEY"]
 elif "api_key" not in st.session_state:
-    # Sidebar input for API Key if not found in env
     api_key = st.sidebar.text_input("Groq API Key (Free)", type="password")
     if not api_key:
         st.warning("Please enter your Groq API Key (from console.groq.com) in the sidebar to use the free LLM.")
@@ -239,9 +234,7 @@ if not qa_engine:
     st.error("Vector Database not found! Please run the Phase 2/3 test scripts first to index the documents.")
     st.stop()
 
-# ---------------------------------------------------------------------------
-# Initialize Chat Memory (persists across Streamlit re-runs within a session)
-# ---------------------------------------------------------------------------
+# Initialize Chat Memory
 if "chat_memory" not in st.session_state:
     st.session_state.chat_memory = ChatMemoryBuffer.from_defaults(token_limit=3072)
 
@@ -250,7 +243,7 @@ qa_engine.set_memory(st.session_state.chat_memory)
 
 st.divider()
 
-# Sidebar for explicit Metadata Filtering (Mimicking Hybrid Keyword Search)
+# Sidebar for explicit Metadata Filtering
 st.sidebar.markdown('<h2 class="sidebar-title">⚙️ Configuration</h2>', unsafe_allow_html=True)
 st.sidebar.markdown("---")
 st.sidebar.markdown('<h3 class="sidebar-title">🔍 Pre-Filtering</h3>', unsafe_allow_html=True)
@@ -289,7 +282,7 @@ for message in st.session_state.messages:
                     if idx < len(message["sources"]):
                         st.markdown("---")
 
-# React to user input
+# Main UI code
 if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM_CODE_404 on router XYZ?'): "):
     # Display user message in chat message container
     st.chat_message("user").markdown(prompt)
@@ -384,7 +377,7 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                 st.error(error_msg)
                 st.session_state.messages.append({"role": "assistant", "content": error_msg})
                 
-                # Log the error for observability
+                # Log the error
                 logger.error(json.dumps({
                     "event": "query_failed",
                     "query": prompt,

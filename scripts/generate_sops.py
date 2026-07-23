@@ -28,10 +28,8 @@ VENDORS = {
 
 SEVERITIES = ["Critical", "Major", "Minor", "Warning"]
 
-# ---------------------------------------------------------------------------
 # Component-specific diagnostic and restoration commands PER VENDOR
 # Each entry: (component, [diag_cmds], [restore_cmds], [verify_cmds])
-# ---------------------------------------------------------------------------
 COMPONENT_COMMANDS = {
     "Cisco": [
         ("BGP Peer", ["show bgp ipv4 unicast summary", "show bgp neighbors {ip} detail", "show ip route bgp"],

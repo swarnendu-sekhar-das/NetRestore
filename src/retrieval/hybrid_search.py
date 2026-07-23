@@ -1,17 +1,8 @@
 """
-True Hybrid Search: Dense Vector + Sparse BM25 + Cross-Encoder Reranking.
+Hybrid Search Module
 
-This module implements a production-grade retrieval pipeline:
-  1. Dense Vector Retrieval  — semantic similarity via ChromaDB embeddings
-  2. Sparse BM25 Retrieval   — lexical keyword matching via rank_bm25
-  3. Reciprocal Rank Fusion   — merges results from both retrievers
-  4. Cross-Encoder Reranking  — joint query-document scoring for precision
-  5. Metadata Pre-filtering   — exact-match vendor/alarm code filtering
-
-Architecture:
-  Query ──┬── Vector Retriever (top-10) ──┐
-          │                                ├── RRF Fusion (top-10) ── Reranker (top-3) ── LLM
-          └── BM25 Retriever   (top-10) ──┘
+Combines keyword search (BM25) and vector search (embeddings) to find 
+the best documents. Then uses a reranker model to pick the absolute best ones.
 """
 
 from llama_index.core.retrievers import BaseRetriever, VectorIndexRetriever
@@ -24,15 +15,9 @@ from src.retrieval.reranker import TelecomReranker
 
 class TelecomHybridRetriever:
     """
-    Manages the full hybrid retrieval pipeline.
-
-    On initialization, it:
-      - Loads the VectorStoreIndex from ChromaDB
-      - Builds a BM25 index from all stored documents
-      - Initializes the cross-encoder reranker
-
-    On query, it returns a TelecomFusionRetriever configured with the
-    requested metadata filters.
+    Sets up the search engine.
+    Loads the vector database, creates the BM25 keyword index, 
+    and loads the reranker model.
     """
 
     def __init__(self, vector_store_manager, similarity_top_k: int = 10):
@@ -48,8 +33,7 @@ class TelecomHybridRetriever:
 
     def _build_bm25_index(self):
         """
-        Retrieve all documents from ChromaDB and build a BM25 (TF-IDF)
-        sparse index for keyword-based retrieval.
+        Gets all documents from the database and creates a keyword search index.
         """
         collection = self.vs_manager.chroma_collection
         results = collection.get(include=["documents", "metadatas"])

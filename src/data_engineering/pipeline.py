@@ -19,9 +19,10 @@ class DataPipeline:
 
     def run(self) -> list[TextNode]:
         """
-        1. Loads Documents
-        2. Applies Format-Specific Chunking (Markdown vs PDF)
-        3. Extracts and Attaches Telecom Metadata
+        Runs the data pipeline:
+        1. Loads files
+        2. Chunks them
+        3. Extracts metadata
         """
         print("--- Starting Data Pipeline ---")
         docs = self.parser.load_documents()
@@ -29,10 +30,10 @@ class DataPipeline:
             print("No documents found. Aborting pipeline.")
             return []
 
-        print("Chunking documents (routing by format)...")
+        print("Chunking documents...")
         nodes = []
         for doc in docs:
-            # Document-level vendor extraction (Fallback for chunks that don't mention it)
+            # Extract vendor from the document text or filename
             doc_vendor = None
             vendors = ["Cisco", "Nokia", "Juniper", "Ericsson", "Huawei", "Arista"]
             # Check first 500 chars or filename

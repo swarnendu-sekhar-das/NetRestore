@@ -1,13 +1,8 @@
-# ============================================================================
 # Git Ignore Configuration for NetRestore Project
-# ============================================================================
 # This file specifies intentionally untracked files that Git should ignore.
 # Patterns are grouped by category for maintainability.
-# ============================================================================
 
-# ---------------------------------------------------------------------------
 # Python Build Artifacts
-# ---------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
@@ -30,9 +25,7 @@ wheels/
 .installed.cfg
 *.egg
 
-# ---------------------------------------------------------------------------
 # Virtual Environments
-# ---------------------------------------------------------------------------
 .env          # Local environment variables (contains secrets)
 .venv
 env/
@@ -40,27 +33,19 @@ venv/
 ENV/
 .ci-env/      # CI/CD temporary environment
 
-# ---------------------------------------------------------------------------
 # Jupyter Notebook Checkpoints
-# ---------------------------------------------------------------------------
 .ipynb_checkpoints
 
-# ---------------------------------------------------------------------------
 # Operating System Artifacts
-# ---------------------------------------------------------------------------
 .DS_Store     # macOS
 Thumbs.db     # Windows
 
-# ---------------------------------------------------------------------------
 # Project-Specific Artifacts
-# ---------------------------------------------------------------------------
 api.txt       # API keys (should be in .env)
 data/llm_generated_sops/*.pdf  # Ignore the 675 generated PDFs (prevent repo bloat)
 !chroma_db/   # DO NOT ignore the database! We need it for Streamlit Cloud deployment.
 
-# ---------------------------------------------------------------------------
 # DevOps Security Exclusions
-# ---------------------------------------------------------------------------
 vault/        # HashiCorp Vault secrets
 *.pem         # Private keys
 *.key         # Key files
@@ -69,8 +54,6 @@ vault/        # HashiCorp Vault secrets
 *.tfstate.backup
 .terraform/
 
-# ---------------------------------------------------------------------------
 # Development Artifacts (not for production repo)
-# ---------------------------------------------------------------------------
 scratch/              # Debug/scratch scripts
 evaluation_results.json  # Generated at runtime by evaluate.py
