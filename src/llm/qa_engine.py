@@ -98,34 +98,47 @@ class ProceduralQAEngine:
         """
         Build a topology context string for the given query.
 
-        Identifies the relevant vendor from filters or query text, finds the
-        corresponding network node(s), and formats the topology + cascade rules
+        Identifies specific network node(s) directly from the query, or falls
+        back to the relevant vendor from filters. Formats the topology + cascade rules
         for injection into the LLM prompt.
         """
         if not self.topology:
             return ""
 
-        # Determine vendor from filters or query
-        vendor = None
-        if filters and "equipment_vendor" in filters:
-            vendor = filters["equipment_vendor"]
-        else:
-            for v in ["Nokia", "Cisco", "Juniper", "Ericsson", "Huawei"]:
-                if v.lower() in query.lower():
-                    vendor = v
-                    break
-
-        if not vendor:
-            return ""
-
-        # Find topology nodes for this vendor
         nodes = self.topology.get("nodes", [])
-        relevant = [n for n in nodes if n.get("vendor") == vendor]
-        if not relevant:
-            return ""
+        
+        # 1. Exact Node-ID Matching
+        specific_node = None
+        for node in nodes:
+            if node.get("node_id", "").lower() in query.lower():
+                specific_node = node
+                break
+                
+        if specific_node:
+            relevant = [specific_node]
+            vendor = specific_node.get("vendor", "Unknown")
+            parts = [f"Affected Node: {specific_node['node_id']} (Vendor: {vendor})"]
+        else:
+            # 2. Fallback to Vendor Matching
+            vendor = None
+            if filters and "equipment_vendor" in filters:
+                vendor = filters["equipment_vendor"]
+            else:
+                for v in ["Nokia", "Cisco", "Juniper", "Ericsson", "Huawei", "Arista"]:
+                    if v.lower() in query.lower():
+                        vendor = v
+                        break
+            
+            if not vendor:
+                return ""
+                
+            relevant = [n for n in nodes if n.get("vendor") == vendor]
+            if not relevant:
+                return ""
+            
+            parts = [f"Affected Vendor: {vendor} (Note: Specify exact node ID for precise topology context)"]
 
         # Build context string
-        parts = [f"Affected Vendor: {vendor}"]
         for node in relevant:
             role = node.get("role", "Unknown")
             connected = ", ".join(node.get("connected_to", []))

@@ -245,19 +245,11 @@ st.sidebar.markdown('<h3 class="sidebar-title">🔍 Pre-Filtering</h3>', unsafe_
 st.sidebar.markdown("Use these filters to ensure exact error codes are retrieved via Metadata Filtering, solving the issue of pure vector search missing specific model numbers.")
 vendor_filter = st.sidebar.selectbox(
     "Equipment Vendor", 
-    ["Any", "Nokia", "Cisco", "Juniper", "Ericsson", "Huawei"],
+    ["Any", "Nokia", "Cisco", "Juniper", "Ericsson", "Huawei", "Arista"],
     label_visibility="visible"
 )
-VENDOR_ALARM_HINTS = {
-    "Cisco":    "Cisco codes: 301–302, 1000–1099",
-    "Nokia":    "Nokia codes: 404, 501, 1100–1199",
-    "Ericsson": "Ericsson codes: 701–702, 1300–1399",
-    "Juniper":  "Juniper codes: 601–602, 1200–1299",
-    "Huawei":   "Huawei codes: 801–802, 1400–1499",
-    "Any":      "e.g. 301, 404, 601, 701, 801, 1000",
-}
-alarm_hint = VENDOR_ALARM_HINTS.get(vendor_filter, "e.g. 1000, 1101, 1201")
-alarm_filter = st.sidebar.text_input(f"Exact Alarm Code ({alarm_hint})", value="", help="Enter the exact alarm code for precise filtering")
+alarm_filter = st.sidebar.text_input("Exact Alarm Code (e.g. 1000-9999)", value="", help="Enter the exact alarm code for precise filtering")
+node_id_filter = st.sidebar.text_input("Exact Node ID (e.g. Cisco-Core-Delhi-NCR-1)", value="", help="Enter exact Node ID to explicitly filter search")
 
 # Initialize chat history
 if "messages" not in st.session_state:
@@ -297,6 +289,8 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
         filters["equipment_vendor"] = vendor_filter
     if alarm_filter.strip():
         filters["alarm_code"] = alarm_filter.strip()
+    if node_id_filter.strip():
+        filters["node_id"] = node_id_filter.strip()
         
     # Query Engine with timing for structured logging
     with st.chat_message("assistant"):
@@ -321,12 +315,15 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                         parts.append(f"alarm code **{alarm_filter.strip()}**")
                     if vendor_filter != "Any":
                         parts.append(f"vendor **{vendor_filter}**")
-                    detail = " for " + " and ".join(parts) if parts else ""
+                    if node_id_filter.strip():
+                        parts.append(f"node ID **{node_id_filter.strip()}**")
+                    
+                    st.error(f"No documents found matching {' and '.join(parts)}. Please try relaxing the filters.")
                     response_text = (
-                        f"⚠️ No matching SOP documents found{detail}.\n\n"
+                        f"⚠️ No matching SOP documents found.\n\n"
                         f"**Possible reasons:**\n"
                         f"- The alarm code may not exist in the {vendor_filter} dataset\n"
-                        f"- Try a 4-digit code (e.g. `1101`, `1201`, `1301`) instead\n"
+                        f"- Try a 4-digit code (e.g. `1000-9999`) instead\n"
                         f"- Clear the alarm code filter and search by description only"
                     )
                 

@@ -7,19 +7,20 @@ from llama_index.core.schema import TextNode
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from src.data_engineering.parser import TelecomDocumentParser
-from src.data_engineering.chunking import get_procedural_chunker, TelecomMetadataExtractor
+from src.data_engineering.chunking import get_markdown_chunker, get_pdf_chunker, TelecomMetadataExtractor
 
 
 class DataPipeline:
     def __init__(self, data_dir: str):
         self.parser = TelecomDocumentParser(data_dir=data_dir)
-        self.chunker = get_procedural_chunker()
+        self.md_chunker = get_markdown_chunker()
+        self.pdf_chunker = get_pdf_chunker()
         self.metadata_extractor = TelecomMetadataExtractor()
 
     def run(self) -> list[TextNode]:
         """
         1. Loads Documents
-        2. Applies Structural Markdown Chunking
+        2. Applies Format-Specific Chunking (Markdown vs PDF)
         3. Extracts and Attaches Telecom Metadata
         """
         print("--- Starting Data Pipeline ---")
@@ -28,12 +29,12 @@ class DataPipeline:
             print("No documents found. Aborting pipeline.")
             return []
 
-        print("Chunking documents structually (by headers)...")
+        print("Chunking documents (routing by format)...")
         nodes = []
         for doc in docs:
             # Document-level vendor extraction (Fallback for chunks that don't mention it)
             doc_vendor = None
-            vendors = ["Cisco", "Nokia", "Juniper", "Ericsson", "Huawei"]
+            vendors = ["Cisco", "Nokia", "Juniper", "Ericsson", "Huawei", "Arista"]
             # Check first 500 chars or filename
             content_sample = doc.get_content()[:500].lower()
             file_name_info = doc.metadata.get("file_name", "").lower()
@@ -42,8 +43,11 @@ class DataPipeline:
                     doc_vendor = v
                     break
 
-            # Current nodes for this doc
-            doc_nodes = self.chunker.get_nodes_from_documents([doc])
+            # Route to the correct chunker based on file extension
+            if file_name_info.endswith(".pdf"):
+                doc_nodes = self.pdf_chunker.get_nodes_from_documents([doc])
+            else:
+                doc_nodes = self.md_chunker.get_nodes_from_documents([doc])
             
             for node in doc_nodes:
                 # Extract specific metadata (Alarm codes, etc.)

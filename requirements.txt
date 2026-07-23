@@ -11,16 +11,13 @@
 # ---------------------------------------------------------------------------
 llama-index
 llama-index-embeddings-huggingface
-llama-index-llms-ollama
 llama-index-llms-groq
-llama-index-vector-stores-qdrant
 llama-index-vector-stores-chroma
 
 # ---------------------------------------------------------------------------
 # Vector Database Clients
 # ---------------------------------------------------------------------------
 chromadb                    # Primary vector store for production
-qdrant-client               # Alternative vector store (optional)
 
 # ---------------------------------------------------------------------------
 # Retrieval & Reranking
@@ -29,22 +26,16 @@ rank-bm25                   # BM25 sparse retrieval for hybrid search
 sentence-transformers       # Cross-encoder reranking model
 
 # ---------------------------------------------------------------------------
-# LLM Integration
-# ---------------------------------------------------------------------------
-langchain-groq              # LangChain integration for Groq API
-langchain-huggingface       # LangChain integration for HuggingFace models
-
-# ---------------------------------------------------------------------------
 # Web Application & API
 # ---------------------------------------------------------------------------
 streamlit                   # Main web application UI
-fastapi                     # REST API framework (optional)
-uvicorn                     # ASGI server for FastAPI
 
 # ---------------------------------------------------------------------------
 # Document Processing
 # ---------------------------------------------------------------------------
 pypdf                       # PDF parsing for SOP documents
+reportlab                   # PDF generation for synthetic SOP dataset
+groq                        # Groq SDK for LLM-based SOP generation
 
 # ---------------------------------------------------------------------------
 # Development & Testing

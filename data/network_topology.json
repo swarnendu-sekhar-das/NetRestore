@@ -1,42 +1,1383 @@
 {
   "network_topology": {
-    "region": "North America",
+    "region": "India",
     "nodes": [
       {
-        "node_id": "Nokia-Core-1",
-        "role": "Core",
+        "node_id": "Nokia-Core-Delhi-NCR-1",
+        "role": "Core Router",
         "vendor": "Nokia",
-        "connected_to": ["Cisco-PE-1", "Juniper-PE-2"]
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Nokia-Core-Delhi-NCR-2",
+          "Juniper-Core-Mumbai-MH-1",
+          "Nokia-Core-Mumbai-MH-2",
+          "Nokia-Core-Bangalore-KA-1",
+          "Nokia-Core-Bangalore-KA-2",
+          "Juniper-Core-Chennai-TN-1",
+          "Nokia-Core-Chennai-TN-2",
+          "Nokia-Core-Kolkata-WB-1",
+          "Nokia-Core-Kolkata-WB-2",
+          "Huawei-PE-Delhi-NCR-11",
+          "Cisco-PE-Delhi-NCR-16",
+          "Nokia-PE-Delhi-NCR-21"
+        ]
       },
       {
-        "node_id": "Cisco-PE-1",
-        "role": "Provider Edge",
-        "vendor": "Cisco",
-        "connected_to": ["Nokia-Core-1", "Customer-Switch-A"]
+        "node_id": "Nokia-Core-Delhi-NCR-2",
+        "role": "Core Router",
+        "vendor": "Nokia",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Nokia-Core-Delhi-NCR-1",
+          "Juniper-Core-Mumbai-MH-1",
+          "Nokia-Core-Mumbai-MH-2",
+          "Nokia-Core-Bangalore-KA-1",
+          "Nokia-Core-Bangalore-KA-2",
+          "Juniper-Core-Chennai-TN-1",
+          "Nokia-Core-Chennai-TN-2",
+          "Nokia-Core-Kolkata-WB-1",
+          "Nokia-Core-Kolkata-WB-2",
+          "Ericsson-PE-Delhi-NCR-23",
+          "Juniper-PE-Delhi-NCR-28",
+          "Cisco-PE-Delhi-NCR-33"
+        ]
       },
       {
-        "node_id": "Juniper-PE-2",
-        "role": "Provider Edge",
+        "node_id": "Juniper-Core-Mumbai-MH-1",
+        "role": "Core Router",
         "vendor": "Juniper",
-        "connected_to": ["Nokia-Core-1", "Ericsson-Access-1"]
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Nokia-Core-Delhi-NCR-1",
+          "Nokia-Core-Delhi-NCR-2",
+          "Nokia-Core-Mumbai-MH-2",
+          "Nokia-Core-Bangalore-KA-1",
+          "Nokia-Core-Bangalore-KA-2",
+          "Juniper-Core-Chennai-TN-1",
+          "Nokia-Core-Chennai-TN-2",
+          "Nokia-Core-Kolkata-WB-1",
+          "Nokia-Core-Kolkata-WB-2",
+          "Ericsson-PE-Mumbai-MH-35",
+          "Ericsson-PE-Mumbai-MH-40",
+          "Ericsson-PE-Mumbai-MH-45"
+        ]
       },
       {
-        "node_id": "Huawei-Core-2",
-        "role": "Core",
+        "node_id": "Nokia-Core-Mumbai-MH-2",
+        "role": "Core Router",
+        "vendor": "Nokia",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Nokia-Core-Delhi-NCR-1",
+          "Nokia-Core-Delhi-NCR-2",
+          "Juniper-Core-Mumbai-MH-1",
+          "Nokia-Core-Bangalore-KA-1",
+          "Nokia-Core-Bangalore-KA-2",
+          "Juniper-Core-Chennai-TN-1",
+          "Nokia-Core-Chennai-TN-2",
+          "Nokia-Core-Kolkata-WB-1",
+          "Nokia-Core-Kolkata-WB-2",
+          "Ericsson-PE-Mumbai-MH-47",
+          "Arista-PE-Mumbai-MH-52",
+          "Huawei-PE-Mumbai-MH-57"
+        ]
+      },
+      {
+        "node_id": "Nokia-Core-Bangalore-KA-1",
+        "role": "Core Router",
+        "vendor": "Nokia",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Nokia-Core-Delhi-NCR-1",
+          "Nokia-Core-Delhi-NCR-2",
+          "Juniper-Core-Mumbai-MH-1",
+          "Nokia-Core-Mumbai-MH-2",
+          "Nokia-Core-Bangalore-KA-2",
+          "Juniper-Core-Chennai-TN-1",
+          "Nokia-Core-Chennai-TN-2",
+          "Nokia-Core-Kolkata-WB-1",
+          "Nokia-Core-Kolkata-WB-2",
+          "Ericsson-PE-Bangalore-KA-59",
+          "Ericsson-PE-Bangalore-KA-64",
+          "Huawei-PE-Bangalore-KA-69"
+        ]
+      },
+      {
+        "node_id": "Nokia-Core-Bangalore-KA-2",
+        "role": "Core Router",
+        "vendor": "Nokia",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Nokia-Core-Delhi-NCR-1",
+          "Nokia-Core-Delhi-NCR-2",
+          "Juniper-Core-Mumbai-MH-1",
+          "Nokia-Core-Mumbai-MH-2",
+          "Nokia-Core-Bangalore-KA-1",
+          "Juniper-Core-Chennai-TN-1",
+          "Nokia-Core-Chennai-TN-2",
+          "Nokia-Core-Kolkata-WB-1",
+          "Nokia-Core-Kolkata-WB-2",
+          "Huawei-PE-Bangalore-KA-71",
+          "Arista-PE-Bangalore-KA-76",
+          "Arista-PE-Bangalore-KA-81"
+        ]
+      },
+      {
+        "node_id": "Juniper-Core-Chennai-TN-1",
+        "role": "Core Router",
+        "vendor": "Juniper",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Nokia-Core-Delhi-NCR-1",
+          "Nokia-Core-Delhi-NCR-2",
+          "Juniper-Core-Mumbai-MH-1",
+          "Nokia-Core-Mumbai-MH-2",
+          "Nokia-Core-Bangalore-KA-1",
+          "Nokia-Core-Bangalore-KA-2",
+          "Nokia-Core-Chennai-TN-2",
+          "Nokia-Core-Kolkata-WB-1",
+          "Nokia-Core-Kolkata-WB-2",
+          "Ericsson-PE-Chennai-TN-83",
+          "Cisco-PE-Chennai-TN-88",
+          "Huawei-PE-Chennai-TN-93"
+        ]
+      },
+      {
+        "node_id": "Nokia-Core-Chennai-TN-2",
+        "role": "Core Router",
+        "vendor": "Nokia",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Nokia-Core-Delhi-NCR-1",
+          "Nokia-Core-Delhi-NCR-2",
+          "Juniper-Core-Mumbai-MH-1",
+          "Nokia-Core-Mumbai-MH-2",
+          "Nokia-Core-Bangalore-KA-1",
+          "Nokia-Core-Bangalore-KA-2",
+          "Juniper-Core-Chennai-TN-1",
+          "Nokia-Core-Kolkata-WB-1",
+          "Nokia-Core-Kolkata-WB-2",
+          "Juniper-PE-Chennai-TN-95",
+          "Nokia-PE-Chennai-TN-100",
+          "Juniper-PE-Chennai-TN-105"
+        ]
+      },
+      {
+        "node_id": "Nokia-Core-Kolkata-WB-1",
+        "role": "Core Router",
+        "vendor": "Nokia",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Nokia-Core-Delhi-NCR-1",
+          "Nokia-Core-Delhi-NCR-2",
+          "Juniper-Core-Mumbai-MH-1",
+          "Nokia-Core-Mumbai-MH-2",
+          "Nokia-Core-Bangalore-KA-1",
+          "Nokia-Core-Bangalore-KA-2",
+          "Juniper-Core-Chennai-TN-1",
+          "Nokia-Core-Chennai-TN-2",
+          "Nokia-Core-Kolkata-WB-2",
+          "Cisco-PE-Kolkata-WB-107",
+          "Cisco-PE-Kolkata-WB-112",
+          "Juniper-PE-Kolkata-WB-117"
+        ]
+      },
+      {
+        "node_id": "Nokia-Core-Kolkata-WB-2",
+        "role": "Core Router",
+        "vendor": "Nokia",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Nokia-Core-Delhi-NCR-1",
+          "Nokia-Core-Delhi-NCR-2",
+          "Juniper-Core-Mumbai-MH-1",
+          "Nokia-Core-Mumbai-MH-2",
+          "Nokia-Core-Bangalore-KA-1",
+          "Nokia-Core-Bangalore-KA-2",
+          "Juniper-Core-Chennai-TN-1",
+          "Nokia-Core-Chennai-TN-2",
+          "Nokia-Core-Kolkata-WB-1",
+          "Huawei-PE-Kolkata-WB-119",
+          "Cisco-PE-Kolkata-WB-124",
+          "Ericsson-PE-Kolkata-WB-129"
+        ]
+      },
+      {
+        "node_id": "Huawei-PE-Delhi-NCR-11",
+        "role": "Provider Edge Router",
         "vendor": "Huawei",
-        "connected_to": ["Cisco-PE-1", "Juniper-PE-2"]
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Nokia-Core-Delhi-NCR-1",
+          "Huawei-Access-Delhi-NCR-12",
+          "Ericsson-Access-Delhi-NCR-14",
+          "Cisco-Access-Delhi-NCR-16"
+        ]
       },
       {
-        "node_id": "Ericsson-Access-1",
+        "node_id": "Huawei-Access-Delhi-NCR-12",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Huawei-PE-Delhi-NCR-11"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Delhi-NCR-14",
         "role": "Access Switch",
         "vendor": "Ericsson",
-        "connected_to": ["Juniper-PE-2"]
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Huawei-PE-Delhi-NCR-11"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Delhi-NCR-16",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Huawei-PE-Delhi-NCR-11"
+        ]
+      },
+      {
+        "node_id": "Cisco-PE-Delhi-NCR-16",
+        "role": "Provider Edge Router",
+        "vendor": "Cisco",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Nokia-Core-Delhi-NCR-1",
+          "Huawei-Access-Delhi-NCR-16",
+          "Cisco-Access-Delhi-NCR-18",
+          "Cisco-Access-Delhi-NCR-20"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Delhi-NCR-16",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Cisco-PE-Delhi-NCR-16"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Delhi-NCR-18",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Cisco-PE-Delhi-NCR-16"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Delhi-NCR-20",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Cisco-PE-Delhi-NCR-16"
+        ]
+      },
+      {
+        "node_id": "Nokia-PE-Delhi-NCR-21",
+        "role": "Provider Edge Router",
+        "vendor": "Nokia",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Nokia-Core-Delhi-NCR-1",
+          "Arista-Access-Delhi-NCR-20",
+          "Huawei-Access-Delhi-NCR-22",
+          "Arista-Access-Delhi-NCR-24"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Delhi-NCR-20",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Nokia-PE-Delhi-NCR-21"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Delhi-NCR-22",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Nokia-PE-Delhi-NCR-21"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Delhi-NCR-24",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Nokia-PE-Delhi-NCR-21"
+        ]
+      },
+      {
+        "node_id": "Ericsson-PE-Delhi-NCR-23",
+        "role": "Provider Edge Router",
+        "vendor": "Ericsson",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Nokia-Core-Delhi-NCR-2",
+          "Huawei-Access-Delhi-NCR-24",
+          "Cisco-Access-Delhi-NCR-26",
+          "Ericsson-Access-Delhi-NCR-28"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Delhi-NCR-24",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Ericsson-PE-Delhi-NCR-23"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Delhi-NCR-26",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Ericsson-PE-Delhi-NCR-23"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Delhi-NCR-28",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Ericsson-PE-Delhi-NCR-23"
+        ]
+      },
+      {
+        "node_id": "Juniper-PE-Delhi-NCR-28",
+        "role": "Provider Edge Router",
+        "vendor": "Juniper",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Nokia-Core-Delhi-NCR-2",
+          "Ericsson-Access-Delhi-NCR-28",
+          "Arista-Access-Delhi-NCR-30",
+          "Ericsson-Access-Delhi-NCR-32"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Delhi-NCR-28",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Juniper-PE-Delhi-NCR-28"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Delhi-NCR-30",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Juniper-PE-Delhi-NCR-28"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Delhi-NCR-32",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Juniper-PE-Delhi-NCR-28"
+        ]
+      },
+      {
+        "node_id": "Cisco-PE-Delhi-NCR-33",
+        "role": "Provider Edge Router",
+        "vendor": "Cisco",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Nokia-Core-Delhi-NCR-2",
+          "Cisco-Access-Delhi-NCR-32",
+          "Arista-Access-Delhi-NCR-34",
+          "Ericsson-Access-Delhi-NCR-36"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Delhi-NCR-32",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Cisco-PE-Delhi-NCR-33"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Delhi-NCR-34",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Cisco-PE-Delhi-NCR-33"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Delhi-NCR-36",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Delhi-NCR",
+        "connected_to": [
+          "Cisco-PE-Delhi-NCR-33"
+        ]
+      },
+      {
+        "node_id": "Ericsson-PE-Mumbai-MH-35",
+        "role": "Provider Edge Router",
+        "vendor": "Ericsson",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Juniper-Core-Mumbai-MH-1",
+          "Arista-Access-Mumbai-MH-36",
+          "Cisco-Access-Mumbai-MH-38",
+          "Cisco-Access-Mumbai-MH-40"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Mumbai-MH-36",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Ericsson-PE-Mumbai-MH-35"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Mumbai-MH-38",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Ericsson-PE-Mumbai-MH-35"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Mumbai-MH-40",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Ericsson-PE-Mumbai-MH-35"
+        ]
+      },
+      {
+        "node_id": "Ericsson-PE-Mumbai-MH-40",
+        "role": "Provider Edge Router",
+        "vendor": "Ericsson",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Juniper-Core-Mumbai-MH-1",
+          "Ericsson-Access-Mumbai-MH-40",
+          "Huawei-Access-Mumbai-MH-42",
+          "Arista-Access-Mumbai-MH-44"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Mumbai-MH-40",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Ericsson-PE-Mumbai-MH-40"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Mumbai-MH-42",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Ericsson-PE-Mumbai-MH-40"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Mumbai-MH-44",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Ericsson-PE-Mumbai-MH-40"
+        ]
+      },
+      {
+        "node_id": "Ericsson-PE-Mumbai-MH-45",
+        "role": "Provider Edge Router",
+        "vendor": "Ericsson",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Juniper-Core-Mumbai-MH-1",
+          "Cisco-Access-Mumbai-MH-44",
+          "Ericsson-Access-Mumbai-MH-46",
+          "Huawei-Access-Mumbai-MH-48"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Mumbai-MH-44",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Ericsson-PE-Mumbai-MH-45"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Mumbai-MH-46",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Ericsson-PE-Mumbai-MH-45"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Mumbai-MH-48",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Ericsson-PE-Mumbai-MH-45"
+        ]
+      },
+      {
+        "node_id": "Ericsson-PE-Mumbai-MH-47",
+        "role": "Provider Edge Router",
+        "vendor": "Ericsson",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Nokia-Core-Mumbai-MH-2",
+          "Arista-Access-Mumbai-MH-48",
+          "Huawei-Access-Mumbai-MH-50",
+          "Ericsson-Access-Mumbai-MH-52"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Mumbai-MH-48",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Ericsson-PE-Mumbai-MH-47"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Mumbai-MH-50",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Ericsson-PE-Mumbai-MH-47"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Mumbai-MH-52",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Ericsson-PE-Mumbai-MH-47"
+        ]
+      },
+      {
+        "node_id": "Arista-PE-Mumbai-MH-52",
+        "role": "Provider Edge Router",
+        "vendor": "Arista",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Nokia-Core-Mumbai-MH-2",
+          "Cisco-Access-Mumbai-MH-52",
+          "Arista-Access-Mumbai-MH-54",
+          "Arista-Access-Mumbai-MH-56"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Mumbai-MH-52",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Arista-PE-Mumbai-MH-52"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Mumbai-MH-54",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Arista-PE-Mumbai-MH-52"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Mumbai-MH-56",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Arista-PE-Mumbai-MH-52"
+        ]
+      },
+      {
+        "node_id": "Huawei-PE-Mumbai-MH-57",
+        "role": "Provider Edge Router",
+        "vendor": "Huawei",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Nokia-Core-Mumbai-MH-2",
+          "Huawei-Access-Mumbai-MH-56",
+          "Huawei-Access-Mumbai-MH-58",
+          "Huawei-Access-Mumbai-MH-60"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Mumbai-MH-56",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Huawei-PE-Mumbai-MH-57"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Mumbai-MH-58",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Huawei-PE-Mumbai-MH-57"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Mumbai-MH-60",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Mumbai-MH",
+        "connected_to": [
+          "Huawei-PE-Mumbai-MH-57"
+        ]
+      },
+      {
+        "node_id": "Ericsson-PE-Bangalore-KA-59",
+        "role": "Provider Edge Router",
+        "vendor": "Ericsson",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Nokia-Core-Bangalore-KA-1",
+          "Cisco-Access-Bangalore-KA-60",
+          "Huawei-Access-Bangalore-KA-62",
+          "Ericsson-Access-Bangalore-KA-64"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Bangalore-KA-60",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Ericsson-PE-Bangalore-KA-59"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Bangalore-KA-62",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Ericsson-PE-Bangalore-KA-59"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Bangalore-KA-64",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Ericsson-PE-Bangalore-KA-59"
+        ]
+      },
+      {
+        "node_id": "Ericsson-PE-Bangalore-KA-64",
+        "role": "Provider Edge Router",
+        "vendor": "Ericsson",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Nokia-Core-Bangalore-KA-1",
+          "Ericsson-Access-Bangalore-KA-64",
+          "Huawei-Access-Bangalore-KA-66",
+          "Arista-Access-Bangalore-KA-68"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Bangalore-KA-64",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Ericsson-PE-Bangalore-KA-64"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Bangalore-KA-66",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Ericsson-PE-Bangalore-KA-64"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Bangalore-KA-68",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Ericsson-PE-Bangalore-KA-64"
+        ]
+      },
+      {
+        "node_id": "Huawei-PE-Bangalore-KA-69",
+        "role": "Provider Edge Router",
+        "vendor": "Huawei",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Nokia-Core-Bangalore-KA-1",
+          "Huawei-Access-Bangalore-KA-68",
+          "Cisco-Access-Bangalore-KA-70",
+          "Cisco-Access-Bangalore-KA-72"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Bangalore-KA-68",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Huawei-PE-Bangalore-KA-69"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Bangalore-KA-70",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Huawei-PE-Bangalore-KA-69"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Bangalore-KA-72",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Huawei-PE-Bangalore-KA-69"
+        ]
+      },
+      {
+        "node_id": "Huawei-PE-Bangalore-KA-71",
+        "role": "Provider Edge Router",
+        "vendor": "Huawei",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Nokia-Core-Bangalore-KA-2",
+          "Arista-Access-Bangalore-KA-72",
+          "Huawei-Access-Bangalore-KA-74",
+          "Cisco-Access-Bangalore-KA-76"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Bangalore-KA-72",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Huawei-PE-Bangalore-KA-71"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Bangalore-KA-74",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Huawei-PE-Bangalore-KA-71"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Bangalore-KA-76",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Huawei-PE-Bangalore-KA-71"
+        ]
+      },
+      {
+        "node_id": "Arista-PE-Bangalore-KA-76",
+        "role": "Provider Edge Router",
+        "vendor": "Arista",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Nokia-Core-Bangalore-KA-2",
+          "Huawei-Access-Bangalore-KA-76",
+          "Arista-Access-Bangalore-KA-78",
+          "Cisco-Access-Bangalore-KA-80"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Bangalore-KA-76",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Arista-PE-Bangalore-KA-76"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Bangalore-KA-78",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Arista-PE-Bangalore-KA-76"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Bangalore-KA-80",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Arista-PE-Bangalore-KA-76"
+        ]
+      },
+      {
+        "node_id": "Arista-PE-Bangalore-KA-81",
+        "role": "Provider Edge Router",
+        "vendor": "Arista",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Nokia-Core-Bangalore-KA-2",
+          "Ericsson-Access-Bangalore-KA-80",
+          "Arista-Access-Bangalore-KA-82",
+          "Ericsson-Access-Bangalore-KA-84"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Bangalore-KA-80",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Arista-PE-Bangalore-KA-81"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Bangalore-KA-82",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Arista-PE-Bangalore-KA-81"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Bangalore-KA-84",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Bangalore-KA",
+        "connected_to": [
+          "Arista-PE-Bangalore-KA-81"
+        ]
+      },
+      {
+        "node_id": "Ericsson-PE-Chennai-TN-83",
+        "role": "Provider Edge Router",
+        "vendor": "Ericsson",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Juniper-Core-Chennai-TN-1",
+          "Huawei-Access-Chennai-TN-84",
+          "Arista-Access-Chennai-TN-86",
+          "Arista-Access-Chennai-TN-88"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Chennai-TN-84",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Ericsson-PE-Chennai-TN-83"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Chennai-TN-86",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Ericsson-PE-Chennai-TN-83"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Chennai-TN-88",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Ericsson-PE-Chennai-TN-83"
+        ]
+      },
+      {
+        "node_id": "Cisco-PE-Chennai-TN-88",
+        "role": "Provider Edge Router",
+        "vendor": "Cisco",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Juniper-Core-Chennai-TN-1",
+          "Arista-Access-Chennai-TN-88",
+          "Arista-Access-Chennai-TN-90",
+          "Huawei-Access-Chennai-TN-92"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Chennai-TN-88",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Cisco-PE-Chennai-TN-88"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Chennai-TN-90",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Cisco-PE-Chennai-TN-88"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Chennai-TN-92",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Cisco-PE-Chennai-TN-88"
+        ]
+      },
+      {
+        "node_id": "Huawei-PE-Chennai-TN-93",
+        "role": "Provider Edge Router",
+        "vendor": "Huawei",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Juniper-Core-Chennai-TN-1",
+          "Ericsson-Access-Chennai-TN-92",
+          "Huawei-Access-Chennai-TN-94",
+          "Arista-Access-Chennai-TN-96"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Chennai-TN-92",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Huawei-PE-Chennai-TN-93"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Chennai-TN-94",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Huawei-PE-Chennai-TN-93"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Chennai-TN-96",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Huawei-PE-Chennai-TN-93"
+        ]
+      },
+      {
+        "node_id": "Juniper-PE-Chennai-TN-95",
+        "role": "Provider Edge Router",
+        "vendor": "Juniper",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Nokia-Core-Chennai-TN-2",
+          "Cisco-Access-Chennai-TN-96",
+          "Ericsson-Access-Chennai-TN-98",
+          "Cisco-Access-Chennai-TN-100"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Chennai-TN-96",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Juniper-PE-Chennai-TN-95"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Chennai-TN-98",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Juniper-PE-Chennai-TN-95"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Chennai-TN-100",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Juniper-PE-Chennai-TN-95"
+        ]
+      },
+      {
+        "node_id": "Nokia-PE-Chennai-TN-100",
+        "role": "Provider Edge Router",
+        "vendor": "Nokia",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Nokia-Core-Chennai-TN-2",
+          "Huawei-Access-Chennai-TN-100",
+          "Ericsson-Access-Chennai-TN-102",
+          "Ericsson-Access-Chennai-TN-104"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Chennai-TN-100",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Nokia-PE-Chennai-TN-100"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Chennai-TN-102",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Nokia-PE-Chennai-TN-100"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Chennai-TN-104",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Nokia-PE-Chennai-TN-100"
+        ]
+      },
+      {
+        "node_id": "Juniper-PE-Chennai-TN-105",
+        "role": "Provider Edge Router",
+        "vendor": "Juniper",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Nokia-Core-Chennai-TN-2",
+          "Cisco-Access-Chennai-TN-104",
+          "Cisco-Access-Chennai-TN-106",
+          "Cisco-Access-Chennai-TN-108"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Chennai-TN-104",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Juniper-PE-Chennai-TN-105"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Chennai-TN-106",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Juniper-PE-Chennai-TN-105"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Chennai-TN-108",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Chennai-TN",
+        "connected_to": [
+          "Juniper-PE-Chennai-TN-105"
+        ]
+      },
+      {
+        "node_id": "Cisco-PE-Kolkata-WB-107",
+        "role": "Provider Edge Router",
+        "vendor": "Cisco",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Nokia-Core-Kolkata-WB-1",
+          "Arista-Access-Kolkata-WB-108",
+          "Arista-Access-Kolkata-WB-110",
+          "Huawei-Access-Kolkata-WB-112"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Kolkata-WB-108",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Cisco-PE-Kolkata-WB-107"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Kolkata-WB-110",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Cisco-PE-Kolkata-WB-107"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Kolkata-WB-112",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Cisco-PE-Kolkata-WB-107"
+        ]
+      },
+      {
+        "node_id": "Cisco-PE-Kolkata-WB-112",
+        "role": "Provider Edge Router",
+        "vendor": "Cisco",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Nokia-Core-Kolkata-WB-1",
+          "Cisco-Access-Kolkata-WB-112",
+          "Ericsson-Access-Kolkata-WB-114",
+          "Huawei-Access-Kolkata-WB-116"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Kolkata-WB-112",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Cisco-PE-Kolkata-WB-112"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Kolkata-WB-114",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Cisco-PE-Kolkata-WB-112"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Kolkata-WB-116",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Cisco-PE-Kolkata-WB-112"
+        ]
+      },
+      {
+        "node_id": "Juniper-PE-Kolkata-WB-117",
+        "role": "Provider Edge Router",
+        "vendor": "Juniper",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Nokia-Core-Kolkata-WB-1",
+          "Arista-Access-Kolkata-WB-116",
+          "Ericsson-Access-Kolkata-WB-118",
+          "Arista-Access-Kolkata-WB-120"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Kolkata-WB-116",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Juniper-PE-Kolkata-WB-117"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Kolkata-WB-118",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Juniper-PE-Kolkata-WB-117"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Kolkata-WB-120",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Juniper-PE-Kolkata-WB-117"
+        ]
+      },
+      {
+        "node_id": "Huawei-PE-Kolkata-WB-119",
+        "role": "Provider Edge Router",
+        "vendor": "Huawei",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Nokia-Core-Kolkata-WB-2",
+          "Huawei-Access-Kolkata-WB-120",
+          "Arista-Access-Kolkata-WB-122",
+          "Cisco-Access-Kolkata-WB-124"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Kolkata-WB-120",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Huawei-PE-Kolkata-WB-119"
+        ]
+      },
+      {
+        "node_id": "Arista-Access-Kolkata-WB-122",
+        "role": "Access Switch",
+        "vendor": "Arista",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Huawei-PE-Kolkata-WB-119"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Kolkata-WB-124",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Huawei-PE-Kolkata-WB-119"
+        ]
+      },
+      {
+        "node_id": "Cisco-PE-Kolkata-WB-124",
+        "role": "Provider Edge Router",
+        "vendor": "Cisco",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Nokia-Core-Kolkata-WB-2",
+          "Ericsson-Access-Kolkata-WB-124",
+          "Cisco-Access-Kolkata-WB-126",
+          "Ericsson-Access-Kolkata-WB-128"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Kolkata-WB-124",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Cisco-PE-Kolkata-WB-124"
+        ]
+      },
+      {
+        "node_id": "Cisco-Access-Kolkata-WB-126",
+        "role": "Access Switch",
+        "vendor": "Cisco",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Cisco-PE-Kolkata-WB-124"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Kolkata-WB-128",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Cisco-PE-Kolkata-WB-124"
+        ]
+      },
+      {
+        "node_id": "Ericsson-PE-Kolkata-WB-129",
+        "role": "Provider Edge Router",
+        "vendor": "Ericsson",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Nokia-Core-Kolkata-WB-2",
+          "Ericsson-Access-Kolkata-WB-128",
+          "Huawei-Access-Kolkata-WB-130",
+          "Huawei-Access-Kolkata-WB-132"
+        ]
+      },
+      {
+        "node_id": "Ericsson-Access-Kolkata-WB-128",
+        "role": "Access Switch",
+        "vendor": "Ericsson",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Ericsson-PE-Kolkata-WB-129"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Kolkata-WB-130",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Ericsson-PE-Kolkata-WB-129"
+        ]
+      },
+      {
+        "node_id": "Huawei-Access-Kolkata-WB-132",
+        "role": "Access Switch",
+        "vendor": "Huawei",
+        "region": "Kolkata-WB",
+        "connected_to": [
+          "Ericsson-PE-Kolkata-WB-129"
+        ]
       }
     ],
     "rules": [
-      "A failure in a Core node cascades to all connected Provider Edge nodes.",
-      "If a Provider Edge node fails, only the local Access Switches are affected.",
-      "If an Access Switch fails, no other network equipment is affected."
+      "A failure in a Core router cascades to all connected Provider Edge nodes in its region.",
+      "If a Provider Edge node fails, only the local Access Switches connected to it are affected.",
+      "If an Access Switch fails, local customer traffic drops but the backbone is unaffected.",
+      "Core node routing flaps (e.g. BGP) can cause transient reconvergence across the pan-India backbone."
     ]
   }
 }

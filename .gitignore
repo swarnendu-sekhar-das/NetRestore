@@ -55,7 +55,8 @@ Thumbs.db     # Windows
 # Project-Specific Artifacts
 # ---------------------------------------------------------------------------
 api.txt       # API keys (should be in .env)
-chroma_db/    # Local vector database (rebuilt in container)
+data/llm_generated_sops/*.pdf  # Ignore the 675 generated PDFs (prevent repo bloat)
+!chroma_db/   # DO NOT ignore the database! We need it for Streamlit Cloud deployment.
 
 # ---------------------------------------------------------------------------
 # DevOps Security Exclusions

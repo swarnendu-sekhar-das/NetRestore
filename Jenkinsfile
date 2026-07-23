@@ -84,22 +84,15 @@ pipeline {
             }
         }
 
-        stage('Deploy to K8s') {
+        stage('Deploy via Docker Compose') {
             steps {
                 sh '''
-                    echo "--- Deploying to Kubernetes (Rolling Update) ---"
-                    export KUBECONFIG=$HOME/.kube/config
-                    # Start minikube if not already running
-                    minikube status || minikube start --memory 2048 --cpus 2
-                    # Load local image into minikube (avoids DockerHub pull inside cluster)
-                    minikube image load ${IMAGE}:${TAG} || true
-                    kubectl set image deployment/telecom-rag \
-                        telecom-rag=${IMAGE}:${TAG} \
-                        -n telecom-rag || \
-                        echo "K8s deploy skipped — apply manifests first: kubectl apply -f k8s/"
-                    kubectl rollout status deployment/telecom-rag \
-                        -n telecom-rag \
-                        --timeout=120s || true
+                    echo "--- Deploying via Docker Compose ---"
+                    # Pull the latest image we just pushed to ensure we have the right build
+                    docker-compose pull
+                    # Spin up the services in detached mode, recreating containers if image changed
+                    docker-compose up -d --remove-orphans
+                    echo "Deployment completed successfully. App is running on port 8501."
                 '''
             }
         }
@@ -112,7 +105,7 @@ pipeline {
             // slackSend channel: '#devops', message: "Build ${BUILD_NUMBER} failed at ${env.STAGE_NAME}"
         }
         success {
-            echo "Pipeline succeeded! Image ${IMAGE}:${TAG} deployed to K8s."
+            echo "Pipeline succeeded! Image ${IMAGE}:${TAG} deployed via Docker Compose."
         }
         always {
             sh 'docker logout || true'
