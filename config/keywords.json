@@ -1,0 +1,13 @@
+{
+  "telecom_keywords": [
+    "alarm", "alarm_code", "procedure", "clear", "restore", "troubleshoot",
+    "outage", "fault", "sop", "mop", "incident", "escalat",
+    "bgp", "ospf", "is-is", "isis", "mpls", "ldp", "rsvp", "bfd",
+    "vrrp", "hsrp", "lacp", "stp", "vpls", "evpn", "pim", "igmp",
+    "oam", "ipsec", "gre",
+    "router", "switch", "interface", "port", "sfp", "optic",
+    "line card", "npu", "psu", "fan tray",
+    "nokia", "cisco", "juniper", "ericsson", "huawei", "arista",
+    "down", "flapping", "timeout", "degraded", "unreachable", "failure"
+  ]
+}

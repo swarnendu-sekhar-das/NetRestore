@@ -25,25 +25,7 @@ from src.llm.prompts import (
 )
 
 
-# ---------------------------------------------------------------------------
-# Keywords for query routing (keyword-based, zero resource cost)
-# ---------------------------------------------------------------------------
-TELECOM_KEYWORDS = [
-    # Alarm & procedure terms
-    "alarm", "alarm_code", "procedure", "clear", "restore", "troubleshoot",
-    "outage", "fault", "sop", "mop", "incident", "escalat",
-    # Protocol terms
-    "bgp", "ospf", "is-is", "isis", "mpls", "ldp", "rsvp", "bfd",
-    "vrrp", "hsrp", "lacp", "stp", "vpls", "evpn", "pim", "igmp",
-    "oam", "ipsec", "gre",
-    # Equipment terms
-    "router", "switch", "interface", "port", "sfp", "optic",
-    "line card", "npu", "psu", "fan tray",
-    # Vendor terms
-    "nokia", "cisco", "juniper", "ericsson", "huawei",
-    # Metric/status terms
-    "down", "flapping", "timeout", "degraded", "unreachable", "failure",
-]
+# The router and topology logic have been extracted to adhere to SRP and OCP.
 
 
 class ProceduralQAEngine:
@@ -59,126 +41,24 @@ class ProceduralQAEngine:
       (used by test scripts).
     """
 
-    def __init__(self, retriever_pipeline, token_limit: int = 3072):
+    def __init__(self, retriever_pipeline, router, topology_service, llm, token_limit: int = 3072):
         """
-        Expects an instance of TelecomHybridRetriever from Phase 3.
-
+        Expects dependencies to be injected (Dependency Inversion Principle).
+        
         Args:
             retriever_pipeline: TelecomHybridRetriever instance
+            router: SemanticRouter instance
+            topology_service: NetworkTopologyService instance
+            llm: Generator instance
             token_limit: Maximum tokens for the chat memory sliding window.
-                         3072 is conservative for Llama-3.1-8B's 8K context window.
         """
         self.retriever = retriever_pipeline
-        self.llm = get_llm_generator()
+        self.router = router
+        self.topology_service = topology_service
+        self.llm = llm
         self.token_limit = token_limit
         # Chat memory will be managed per-session (set externally by Streamlit)
         self.memory = None
-
-        # Load network topology for cascade-aware reasoning
-        self.topology = self._load_topology()
-
-    def _load_topology(self) -> dict:
-        """
-        Load the network topology JSON file for cascade failure analysis.
-        Returns an empty dict if the file doesn't exist.
-        """
-        topology_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "data", "network_topology.json")
-        )
-        if os.path.exists(topology_path):
-            with open(topology_path, "r") as f:
-                data = json.load(f)
-            print(f"✅ Network topology loaded: {len(data.get('network_topology', {}).get('nodes', []))} nodes")
-            return data.get("network_topology", {})
-        else:
-            print("⚠️  network_topology.json not found. Topology-aware reasoning disabled.")
-            return {}
-
-    def _get_topology_context(self, query: str, filters: dict = None) -> str:
-        """
-        Build a topology context string for the given query.
-
-        Identifies specific network node(s) directly from the query, or falls
-        back to the relevant vendor from filters. Formats the topology + cascade rules
-        for injection into the LLM prompt.
-        """
-        if not self.topology:
-            return ""
-
-        nodes = self.topology.get("nodes", [])
-        
-        # 1. Exact Node-ID Matching
-        specific_node = None
-        for node in nodes:
-            if node.get("node_id", "").lower() in query.lower():
-                specific_node = node
-                break
-                
-        if specific_node:
-            relevant = [specific_node]
-            vendor = specific_node.get("vendor", "Unknown")
-            parts = [f"Affected Node: {specific_node['node_id']} (Vendor: {vendor})"]
-        else:
-            # 2. Fallback to Vendor Matching
-            vendor = None
-            if filters and "equipment_vendor" in filters:
-                vendor = filters["equipment_vendor"]
-            else:
-                for v in ["Nokia", "Cisco", "Juniper", "Ericsson", "Huawei", "Arista"]:
-                    if v.lower() in query.lower():
-                        vendor = v
-                        break
-            
-            if not vendor:
-                return ""
-                
-            relevant = [n for n in nodes if n.get("vendor") == vendor]
-            if not relevant:
-                return ""
-            
-            parts = [f"Affected Vendor: {vendor} (Note: Specify exact node ID for precise topology context)"]
-
-        # Build context string
-        for node in relevant:
-            role = node.get("role", "Unknown")
-            connected = ", ".join(node.get("connected_to", []))
-            parts.append(f"  • Node: {node['node_id']} | Role: {role} | Connected to: {connected}")
-
-        # Add cascade rules
-        rules = self.topology.get("rules", [])
-        if rules:
-            parts.append("\nCascade Failure Rules:")
-            for rule in rules:
-                parts.append(f"  • {rule}")
-
-        return "\n".join(parts)
-
-    def _classify_query(self, query: str, has_memory: bool = False) -> str:
-        """
-        Keyword-based query routing. Zero resource cost.
-        Includes a 'conversational fallback': if memory exists, be more lenient.
-
-        Returns:
-            'telecom'  — query is about telecom alarms/SOPs/equipment
-            'general'  — query is out-of-scope
-        """
-        query_lower = query.lower()
-
-        # Conversational fallback: If this is a follow-up, treat it as telecom
-        # (e.g. "and then?", "more details?", "further steps?")
-        if has_memory:
-            return "telecom"
-
-        # Check if any telecom keyword appears in the query
-        for keyword in TELECOM_KEYWORDS:
-            if keyword in query_lower:
-                return "telecom"
-
-        # Also match ALARM_CODE_XXX patterns
-        if "alarm" in query_lower or "code" in query_lower:
-            return "telecom"
-
-        return "general"
 
     def set_memory(self, memory: ChatMemoryBuffer):
         """
@@ -201,14 +81,14 @@ class ProceduralQAEngine:
         # ── Query Routing ──
         # Check if we have active conversational context to bypass strict filtering
         has_memory = self.memory is not None and len(self.memory.get_all()) > 0
-        query_type = self._classify_query(query_str, has_memory=has_memory)
+        query_type = self.router.classify(query_str, has_memory=has_memory)
         
         if query_type == "general":
             # Return a polite out-of-scope response without wasting retrieval/LLM resources
             return _OutOfScopeResponse(OUT_OF_SCOPE_RESPONSE)
 
         # ── Build topology context ──
-        topology_ctx = self._get_topology_context(query_str, filters)
+        topology_ctx = self.topology_service.get_topology_context(query_str, filters)
         topology_suffix = ""
         if topology_ctx:
             topology_suffix = TOPOLOGY_CONTEXT_TEMPLATE.format(topology_context=topology_ctx)

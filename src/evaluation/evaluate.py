@@ -31,6 +31,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from src.retrieval.vector_store import TelecomVectorStore
 from src.retrieval.hybrid_search import TelecomHybridRetriever
 from src.llm.qa_engine import ProceduralQAEngine
+from src.llm.router import SemanticRouter
+from src.llm.topology import NetworkTopologyService
+from src.llm.generator import get_llm_generator
 
 
 def load_ground_truth(path: str) -> list[dict]:
@@ -236,7 +239,15 @@ def main():
             print("\n⚠️  GROQ_API_KEY not set. Skipping generation evaluation.")
             print("   Set it with: export GROQ_API_KEY=gsk_...")
         else:
-            qa_engine = ProceduralQAEngine(retriever_pipeline=retriever)
+            router = SemanticRouter()
+            topology_service = NetworkTopologyService()
+            llm = get_llm_generator()
+            qa_engine = ProceduralQAEngine(
+                retriever_pipeline=retriever,
+                router=router,
+                topology_service=topology_service,
+                llm=llm
+            )
             generation_metrics = evaluate_generation(qa_engine, qa_pairs)
     else:
         print("\n⏭️  Skipping LLM generation evaluation (--skip-llm flag)")

@@ -11,6 +11,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 from src.retrieval.vector_store import TelecomVectorStore
 from src.retrieval.hybrid_search import TelecomHybridRetriever
 from src.llm.qa_engine import ProceduralQAEngine
+from src.llm.router import SemanticRouter
+from src.llm.topology import NetworkTopologyService
+from src.llm.generator import get_llm_generator
 from llama_index.core.memory import ChatMemoryBuffer
 
 # ---------------------------------------------------------------------------
@@ -191,7 +194,16 @@ def load_qa_engine(api_key: str = None):
         
     vs_manager = TelecomVectorStore(db_path=db_path)
     retriever = TelecomHybridRetriever(vector_store_manager=vs_manager, similarity_top_k=10)
-    return ProceduralQAEngine(retriever_pipeline=retriever)
+    router = SemanticRouter()
+    topology_service = NetworkTopologyService()
+    llm = get_llm_generator()
+    
+    return ProceduralQAEngine(
+        retriever_pipeline=retriever,
+        router=router,
+        topology_service=topology_service,
+        llm=llm
+    )
 
 # Header Information
 st.markdown("""
