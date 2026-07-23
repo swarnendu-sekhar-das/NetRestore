@@ -1,6 +1,8 @@
 <div align="center">
   <h1>🌐 NetRestore: Agentic RAG for Telecom Network Recovery</h1>
   <p><i>An advanced Hybrid-Search AI System designed to instantly diagnose and provide Standard Operating Procedures (SOPs) for critical telecommunications equipment failures.</i></p>
+  <br>
+  <h3>🔴 <a href="https://netrestore.streamlit.app/">Live Demo Available Here</a></h3>
 </div>
 
 ---
@@ -53,30 +55,7 @@ To simulate a real-world enterprise environment, this project features a massive
 
 ---
 
-## 🛠️ Local Setup & Installation
 
-### 1. Clone & Install
-```bash
-git clone https://github.com/your-username/NetRestore.git
-cd NetRestore
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-### 2. Set API Keys
-Create a `.env` file in the root directory (this is `.gitignore`'d for security):
-```env
-GROQ_API_KEY="your_api_key_here"
-```
-
-### 3. Run the App
-Since the database (`chroma_db/`) is already pre-built and included in the repository, you can launch the app instantly:
-```bash
-streamlit run src/app/main.py
-```
-
----
 
 ## 🐳 Docker Deployment
 
