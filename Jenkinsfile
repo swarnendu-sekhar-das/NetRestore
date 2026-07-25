@@ -26,7 +26,7 @@ pipeline {
                     uv pip install -r requirements.txt
                     uv pip install pytest flake8
                     echo "Running flake8 lint"
-                    flake8 src/ --max-line-length=120 --ignore=E501,W503 || true
+                    flake8 src/ --max-line-length=120 --ignore=E501,W503
                     echo "Running unit tests"
                     python -m pytest notebooks/test_chunking.py tests -v
                 '''
