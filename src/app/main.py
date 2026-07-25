@@ -321,13 +321,18 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                     if node_id_filter.strip():
                         parts.append(f"node ID **{node_id_filter.strip()}**")
                     
-                    st.error(f"No documents found matching {' and '.join(parts)}. Please try relaxing the filters.")
+                    if parts:
+                        st.error(f"No documents found matching {' and '.join(parts)}. Please try relaxing the filters.")
+                    else:
+                        st.error("No documents found matching your query. Please try rephrasing or relaxing the filters.")
+                    
+                    dataset_name = "dataset" if vendor_filter == "Any" else f"{vendor_filter} dataset"
                     response_text = (
                         f"⚠️ No matching SOP documents found.\n\n"
                         f"**Possible reasons:**\n"
-                        f"- The alarm code may not exist in the {vendor_filter} dataset\n"
+                        f"- The alarm code or query keywords may not exist in the {dataset_name}\n"
                         f"- Try a 4-digit code (e.g. `1000-9999`) instead\n"
-                        f"- Clear the alarm code filter and search by description only"
+                        f"- Clear any active filters and search by description only"
                     )
                 
                 st.markdown(response_text)

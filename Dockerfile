@@ -30,6 +30,7 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 # Copy application code and scripts.
 COPY src/ ./src/
 COPY data/ ./data/
+COPY config/ ./config/
 COPY notebooks/ ./notebooks/
 COPY scripts/ ./scripts/
 
