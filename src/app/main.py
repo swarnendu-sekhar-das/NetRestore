@@ -274,7 +274,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
         if "sources" in message and message["sources"]:
-            with st.expander("📄 Show Retrieved Context (For Academic Evaluation)", expanded=False):
+            with st.expander("📄 Show Retrieved Context", expanded=False):
                 for idx, source in enumerate(message["sources"], 1):
                     st.markdown(f"### Source {idx}")
                     st.markdown(f"**Document:** `{source['file_name']}`  \n**Section Header:** `{source['header']}`  \n**Confidence Score:** `{source['score']:.2f}`")
@@ -346,7 +346,7 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                 # Store source snippets with the displayed answer.
                 source_data = []
                 if hasattr(response, 'source_nodes') and response.source_nodes:
-                    with st.expander("📄 Show Retrieved Context (For Academic Evaluation)", expanded=False):
+                    with st.expander("📄 Show Retrieved Context", expanded=False):
                         for idx, node in enumerate(response.source_nodes, 1):
                             file_name = node.node.metadata.get('file_name', 'Unknown')
                             header = node.node.metadata.get('header_path', 'No Header')
