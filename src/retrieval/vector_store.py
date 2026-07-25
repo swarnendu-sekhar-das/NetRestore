@@ -3,6 +3,9 @@ from llama_index.core import VectorStoreIndex, StorageContext
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from src.retrieval.embeddings import get_embedding_model
 import os
+import logging
+
+logger = logging.getLogger("netrestore")
 
 class TelecomVectorStore:
     """Manage the local ChromaDB collection and its LlamaIndex wrapper."""
@@ -25,13 +28,13 @@ class TelecomVectorStore:
 
     def insert_nodes(self, nodes):
         """Embed the supplied chunks and store them in ChromaDB."""
-        print(f"Indexing {len(nodes)} chunks into ChromaDB at {self.db_path}.")
+        logger.info(f"Indexing {len(nodes)} chunks into ChromaDB at {self.db_path}.")
         self.index = VectorStoreIndex(
             nodes, 
             storage_context=self.storage_context, 
             embed_model=self.embed_model
         )
-        print("Indexing complete.")
+        logger.info("Indexing complete.")
         
     def get_index(self):
         """Load the existing index if this instance has not created one."""

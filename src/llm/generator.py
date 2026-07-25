@@ -1,6 +1,9 @@
 import os
+import logging
 from llama_index.llms.groq import Groq
 from dotenv import load_dotenv
+
+logger = logging.getLogger("netrestore")
 
 def get_llm_generator():
     """Create the Groq client used to generate responses."""
@@ -8,7 +11,7 @@ def get_llm_generator():
     load_dotenv()
     
     if "GROQ_API_KEY" not in os.environ:
-        print("Warning: GROQ_API_KEY is not set. LLM generation may fail.")
+        logger.warning("Warning: GROQ_API_KEY is not set. LLM generation may fail.")
         
     llm = Groq(
         model="llama-3.1-8b-instant",

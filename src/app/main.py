@@ -369,6 +369,7 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                 # Save the assistant response in the current session.
                 st.session_state.messages.append({"role": "assistant", "content": response_text, "sources": source_data})
                 
+            # Catching generic Exception here because the LLM API might throw various unpredictable errors (e.g., timeout, connection dropped, parsing failures)
             except Exception as e:
                 latency = time.time() - start_time
                 error_msg = f"**Error:** Failed to generate response. Please check your Groq API Key.\n\n`{str(e)}`"

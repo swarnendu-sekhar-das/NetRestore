@@ -176,6 +176,7 @@ def evaluate_generation(qa_engine, qa_pairs: list[dict]) -> dict:
                 f"Keywords: {kw_found}/{len(expected_keywords)}."
             )
 
+        # Fallback generic exception handler for unexpected API disconnects or generation timeouts
         except Exception as e:
             print(f"Error: Question {i + 1}: '{query[:50]}' {str(e)[:80]}")
             total_latency += 0

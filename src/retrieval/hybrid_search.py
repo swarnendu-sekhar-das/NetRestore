@@ -4,8 +4,11 @@ from llama_index.core.retrievers import BaseRetriever, VectorIndexRetriever
 from llama_index.core.vector_stores import MetadataFilters, ExactMatchFilter
 from llama_index.core.schema import NodeWithScore, TextNode, QueryBundle
 from rank_bm25 import BM25Okapi
+import logging
 
 from src.retrieval.reranker import TelecomReranker
+
+logger = logging.getLogger("netrestore")
 
 
 class TelecomHybridRetriever:
@@ -32,14 +35,13 @@ class TelecomHybridRetriever:
         self.bm25_corpus_metas = results["metadatas"]
 
         if not self.bm25_corpus_docs:
-            print("Warning: ChromaDB collection is empty. BM25 index was not built.")
+            logger.warning("Warning: ChromaDB collection is empty. BM25 index was not built.")
             self.bm25 = None
             return
 
-        # BM25 uses lower-case whitespace tokenization here.
         tokenized = [doc.lower().split() for doc in self.bm25_corpus_docs]
         self.bm25 = BM25Okapi(tokenized)
-        print(f"BM25 index built for {len(self.bm25_corpus_docs)} documents.")
+        logger.info(f"BM25 index built for {len(self.bm25_corpus_docs)} documents.")
 
     def get_retriever(self, filters: dict = None):
         """Return a fusion retriever configured with optional metadata filters."""

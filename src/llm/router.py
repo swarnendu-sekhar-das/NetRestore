@@ -1,5 +1,8 @@
 import json
 import os
+import logging
+
+logger = logging.getLogger("netrestore")
 
 class SemanticRouter:
     """Route obvious telecom queries with keywords from a configuration file."""
@@ -15,7 +18,7 @@ class SemanticRouter:
             with open(config_path, "r") as f:
                 data = json.load(f)
                 return data.get("telecom_keywords", [])
-        print("Warning: keywords.json was not found. The router has no configured keywords.")
+        logger.warning("Warning: keywords.json was not found. The router has no configured keywords.")
         return []
 
     def classify(self, query: str, has_memory: bool = False) -> str:

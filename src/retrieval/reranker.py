@@ -1,6 +1,9 @@
 """Cross-encoder reranking for candidates returned by hybrid retrieval."""
 
 from llama_index.core.schema import NodeWithScore
+import logging
+
+logger = logging.getLogger("netrestore")
 
 
 class TelecomReranker:
@@ -11,9 +14,9 @@ class TelecomReranker:
             from sentence_transformers import CrossEncoder
             self.model = CrossEncoder(model_name)
             self.available = True
-            print(f"Reranker loaded: {model_name}")
-        except Exception as e:
-            print(f"Warning: Reranker model could not be loaded: {e}. Using retrieval scores instead.")
+            logger.info(f"Reranker loaded: {model_name}")
+        except ImportError as e:
+            logger.warning(f"Warning: Reranker model could not be loaded: {e}. Using retrieval scores instead.")
             self.model = None
             self.available = False
 

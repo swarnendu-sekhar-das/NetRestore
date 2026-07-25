@@ -3,6 +3,10 @@ import os
 
 from llama_index.core.schema import TextNode
 
+import logging
+
+logger = logging.getLogger("netrestore")
+
 # Add the project root so the src package can be imported.
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -18,13 +22,13 @@ class DataPipeline:
 
     def run(self) -> list[TextNode]:
         """Load SOP PDFs, split them into chunks, and add metadata."""
-        print("Starting data pipeline.")
+        logger.info("Starting data pipeline.")
         docs = self.parser.load_documents()
         if not docs:
-            print("No documents found. Aborting pipeline.")
+            logger.warning("No documents found. Aborting pipeline.")
             return []
 
-        print("Chunking documents.")
+        logger.info("Chunking documents.")
         nodes = []
         for doc in docs:
             # Find the vendor in the document text or filename.
@@ -58,7 +62,7 @@ class DataPipeline:
             
             nodes.extend(doc_nodes)
 
-        print(f"Produced and enriched {len(nodes)} structural chunks.")
+        logger.info(f"Produced and enriched {len(nodes)} structural chunks.")
 
-        print("Data pipeline finished.")
+        logger.info("Data pipeline finished.")
         return nodes

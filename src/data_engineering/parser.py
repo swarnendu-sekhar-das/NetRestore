@@ -1,6 +1,9 @@
 import os
 from llama_index.core import SimpleDirectoryReader
 from llama_index.core.schema import Document
+import logging
+
+logger = logging.getLogger("netrestore")
 
 
 # The production corpus currently contains SOP PDFs only.
@@ -17,10 +20,10 @@ class TelecomDocumentParser:
     def load_documents(self) -> list[Document]:
         """Load approved SOP PDFs from the configured corpus directory."""
         if not os.path.exists(self.data_dir):
-            print(f"Directory {self.data_dir} not found.")
+            logger.warning(f"Directory {self.data_dir} not found.")
             return []
             
-        print(f"Loading documents from {self.data_dir}.")
+        logger.info(f"Loading documents from {self.data_dir}.")
         
         # Use LlamaParse when it is configured; otherwise use the default PDF reader.
         file_extractor = {}
@@ -28,12 +31,12 @@ class TelecomDocumentParser:
         if llama_api_key:
             try:
                 from llama_parse import LlamaParse
-                print("LlamaParse API Key found. Using LlamaParse for complex PDFs.")
+                logger.info("LlamaParse API Key found. Using LlamaParse for complex PDFs.")
                 file_extractor[".pdf"] = LlamaParse(result_type="markdown")
             except ImportError:
-                print("llama_parse not installed. Falling back to default PyPDF.")
+                logger.warning("llama_parse not installed. Falling back to default PyPDF.")
         else:
-            print("No LLAMA_CLOUD_API_KEY found. Using standard PyPDF for PDF parsing.")
+            logger.info("No LLAMA_CLOUD_API_KEY found. Using standard PyPDF for PDF parsing.")
 
         reader = SimpleDirectoryReader(
             input_dir=self.data_dir,
@@ -42,5 +45,5 @@ class TelecomDocumentParser:
             file_extractor=file_extractor if file_extractor else None
         )
         documents = reader.load_data()
-        print(f"Successfully loaded {len(documents)} document pages/files.")
+        logger.info(f"Successfully loaded {len(documents)} document pages/files.")
         return documents

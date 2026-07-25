@@ -2,6 +2,9 @@ import json
 import os
 from collections import deque
 from typing import Any
+import logging
+
+logger = logging.getLogger("netrestore")
 
 
 class NetworkTopologyService:
@@ -34,10 +37,10 @@ class NetworkTopologyService:
             with open(topology_path, "r") as f:
                 data = json.load(f)
             topology = data.get("network_topology", {})
-            print(f"Network topology loaded: {len(topology.get('nodes', []))} nodes.")
+            logger.info(f"Network topology loaded: {len(topology.get('nodes', []))} nodes.")
             return topology
 
-        print("Warning: network_topology.json was not found. Topology context is disabled.")
+        logger.warning("Warning: network_topology.json was not found. Topology context is disabled.")
         return {}
 
     def get_impact_paths(self, node_id: str, max_hops: int = DEFAULT_MAX_HOPS) -> dict[str, Any]:
