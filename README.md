@@ -1,13 +1,13 @@
 <div align="center">
-  <h1>🌐 NetRestore: Hybrid RAG for Telecom SOP Retrieval</h1>
+  <h1>NetRestore: Hybrid RAG for Telecom SOP Retrieval</h1>
   <p><i>A hybrid-search assistant for finding and presenting Standard Operating Procedures (SOPs) for telecommunications equipment failures.</i></p>
   <br>
-  <h3>🔴 <a href="https://netrestore.streamlit.app/">Live Demo Available Here</a></h3>
+  <h3><a href="https://netrestore.streamlit.app/">Live Demo Available Here</a></h3>
 </div>
 
 ---
 
-## 🚀 Overview
+## Overview
 
 In enterprise telecommunications, when a core router (e.g., Nokia, Cisco, Juniper) experiences an alarm, network engineers spend critical minutes digging through thousands of pages of PDF manuals to find the correct recovery procedure. 
 
@@ -15,7 +15,7 @@ In enterprise telecommunications, when a core router (e.g., Nokia, Cisco, Junipe
 
 ---
 
-## 🧠 Core AI Architecture
+## Core AI Architecture
 
 This is not a basic LangChain wrapper. NetRestore is built on a highly customized LlamaIndex backend designed for exact-match retrieval in high-stakes environments.
 
@@ -33,7 +33,7 @@ Network failures are rarely isolated. For an exact node ID, the backend reads th
 
 ---
 
-## 🏗️ Data Engineering Pipeline
+## Data Engineering Pipeline
 
 To simulate a real-world enterprise environment, this project features a massive synthetic data generation pipeline:
 *   **LLM Data Generation:** Uses the Groq API (Llama-3) to synthetically generate **675 heavily-structured, domain-specific Telecom SOP PDFs** spanning Cisco, Juniper, Nokia, Ericsson, Huawei, and Arista equipment.
@@ -41,7 +41,7 @@ To simulate a real-world enterprise environment, this project features a massive
 
 ---
 
-## 💻 Tech Stack
+## Tech Stack
 
 *   **AI Framework:** LlamaIndex
 *   **Vector Database:** ChromaDB
@@ -55,7 +55,7 @@ To simulate a real-world enterprise environment, this project features a massive
 
 
 
-## 🐳 Docker Deployment
+## Docker Deployment
 
 To deploy this in a production-like containerized environment, simply use Docker Compose:
 ```bash
@@ -65,7 +65,7 @@ The app will be available at `http://localhost:8501`.
 
 ---
 
-## 📊 Evaluation & Testing
+## Evaluation & Testing
 The system utilizes a dual-evaluation strategy:
 1.  **Fast CI/CD Testing:** A custom Python script (`src/evaluation/evaluate.py`) with 25 file-grounded cases. It reports Exact Document Hit@1, Exact Document Recall@3, and MRR based on the first retrieval of the expected SOP file. Keyword hit rate is retained only as a secondary context proxy.
 2.  **Deep NLP Evaluation:** A Jupyter Notebook (`notebooks/evaluation_ragas.ipynb`) leveraging the **RAGAS framework** to mathematically score the LLM on Faithfulness and Answer Relevance.
