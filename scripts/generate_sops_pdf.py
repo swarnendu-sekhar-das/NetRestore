@@ -9,11 +9,11 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 
-# Load environment variables
+# Load variables from the local environment file.
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 if "GROQ_API_KEY" not in os.environ:
-    print("❌ ERROR: GROQ_API_KEY not found in environment. Please add it to your .env file.")
+    print("Error: GROQ_API_KEY was not found. Add it to the .env file.")
     exit(1)
 
 client = Groq()
@@ -104,7 +104,7 @@ def save_as_styled_pdf(data, pdf_filepath, node_id, vendor, alarm_code, severity
 
     Story = []
     
-    # Implicit strings needed by Chunking Regex (now including Node ID)
+    # Keep metadata in the PDF text so the ingestion regex can find it.
     hidden_meta = f"<font color='white' size='1'>ALARM_CODE_{alarm_code} Severity: {severity} NodeID: {node_id}</font>"
     Story.append(Paragraph(hidden_meta, normal_style))
     
@@ -157,10 +157,10 @@ def main():
     
     nodes = load_topology_nodes()
     if not nodes:
-        print("❌ ERROR: No nodes found in topology.")
+        print("Error: No nodes were found in the topology file.")
         return
         
-    print(f"🚀 Starting Node-Aware SOP Generation ({len(nodes)} nodes available)...")
+    print(f"Starting SOP generation with {len(nodes)} available nodes.")
     
     TOTAL_TO_GENERATE = 1000 
     generated_set = set()
@@ -175,7 +175,7 @@ def main():
         alarm_code = random.randint(1000, 9999)
         severity = random.choice(SEVERITIES)
         
-        # Enforce exact uniqueness
+        # Do not generate the same node and alarm-code pair twice.
         combo_key = f"{node_id}_{alarm_code}"
         if combo_key in generated_set:
             continue
@@ -186,14 +186,14 @@ def main():
         if os.path.exists(filepath):
             continue
             
-        print(f"Generating {generated+1}/{TOTAL_TO_GENERATE}: {node_id} (ALARM_{alarm_code})...")
+        print(f"Generating {generated + 1} of {TOTAL_TO_GENERATE}: {node_id}, ALARM_{alarm_code}.")
         
         sop_data = generate_sop_json(node_id, vendor, role, alarm_code, severity)
         
         if sop_data:
             try:
                 save_as_styled_pdf(sop_data, filepath, node_id, vendor, alarm_code, severity)
-                print(f"✅ Saved: {filename}")
+                print(f"Saved: {filename}")
                 generated_set.add(combo_key)
                 generated += 1
             except Exception as e:
@@ -201,7 +201,7 @@ def main():
             
         time.sleep(2)
         
-    print(f"\\n🎉 Successfully generated {TOTAL_TO_GENERATE} node-linked SOPs.")
+    print(f"Generated {TOTAL_TO_GENERATE} node-linked SOPs.")
 
 if __name__ == "__main__":
     main()

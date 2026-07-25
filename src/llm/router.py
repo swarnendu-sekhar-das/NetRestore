@@ -2,10 +2,7 @@ import json
 import os
 
 class SemanticRouter:
-    """
-    Keyword-based query routing. Zero resource cost.
-    Loads keywords from configuration to adhere to the Open/Closed Principle.
-    """
+    """Route obvious telecom queries with keywords from a configuration file."""
     def __init__(self, config_path: str = None):
         if not config_path:
             config_path = os.path.abspath(
@@ -18,27 +15,23 @@ class SemanticRouter:
             with open(config_path, "r") as f:
                 data = json.load(f)
                 return data.get("telecom_keywords", [])
-        print("⚠️  Warning: keywords.json not found. Router using default empty list.")
+        print("Warning: keywords.json was not found. The router has no configured keywords.")
         return []
 
     def classify(self, query: str, has_memory: bool = False) -> str:
-        """
-        Returns:
-            'telecom'  — query is about telecom alarms/SOPs/equipment
-            'general'  — query is out-of-scope
-        """
+        """Return ``telecom`` for supported queries and ``general`` otherwise."""
         query_lower = query.lower()
 
-        # Conversational fallback: If this is a follow-up, treat it as telecom
+        # Treat follow-up questions as telecom questions.
         if has_memory:
             return "telecom"
 
-        # Check if any telecom keyword appears in the query
+        # Check the configured telecom keywords.
         for keyword in self.keywords:
             if keyword in query_lower:
                 return "telecom"
 
-        # Also match ALARM_CODE_XXX patterns
+        # Keep alarm-related questions in scope.
         if "alarm" in query_lower or "code" in query_lower:
             return "telecom"
 

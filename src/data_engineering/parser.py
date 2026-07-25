@@ -2,24 +2,27 @@ import os
 from llama_index.core import SimpleDirectoryReader
 from llama_index.core.schema import Document
 
+
+# The production corpus currently contains SOP PDFs only.
+# This prevents configuration and evaluation JSON from being indexed.
+SOP_FILE_EXTENSIONS = [".pdf"]
+
 class TelecomDocumentParser:
-    """
-    Handles reading multiple formats of SOPs and returning a consistent format
-    for downstream chunking.
-    """
+    """Load approved SOP PDFs for the chunking pipeline."""
     
-    def __init__(self, data_dir: str):
+    def __init__(self, data_dir: str, required_exts: list[str] | None = None):
         self.data_dir = data_dir
+        self.required_exts = required_exts or SOP_FILE_EXTENSIONS
         
     def load_documents(self) -> list[Document]:
-        """Load Markdown, JSON, and PDFs from the data directory."""
+        """Load approved SOP PDFs from the configured corpus directory."""
         if not os.path.exists(self.data_dir):
             print(f"Directory {self.data_dir} not found.")
             return []
             
-        print(f"Loading documents from {self.data_dir}...")
+        print(f"Loading documents from {self.data_dir}.")
         
-        # Setup advanced parser (LlamaParse) if API key is present, otherwise fallback to standard PyPDF
+        # Use LlamaParse when it is configured; otherwise use the default PDF reader.
         file_extractor = {}
         llama_api_key = os.environ.get("LLAMA_CLOUD_API_KEY")
         if llama_api_key:
@@ -35,7 +38,7 @@ class TelecomDocumentParser:
         reader = SimpleDirectoryReader(
             input_dir=self.data_dir,
             recursive=True,
-            required_exts=['.md', '.pdf', '.json'],
+            required_exts=self.required_exts,
             file_extractor=file_extractor if file_extractor else None
         )
         documents = reader.load_data()

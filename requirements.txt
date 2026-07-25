@@ -27,6 +27,7 @@ groq                        # Groq SDK for LLM-based SOP generation
 # Development & Testing
 jupyterlab                  # Interactive development environment
 ragas                       # RAG evaluation metrics
+pytest                      # Unit testing framework
 
 # Utilities
 python-dotenv               # Environment variable management

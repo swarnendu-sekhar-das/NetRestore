@@ -1,34 +1,19 @@
-"""
-Cross-Encoder Reranker for NetRestore RAG Pipeline.
-
-Uses a lightweight cross-encoder model (ms-marco-MiniLM-L-6-v2, ~80MB) to
-rerank candidate documents after initial retrieval.  Cross-encoders process
-(query, document) pairs jointly through a full transformer forward pass,
-producing much more accurate relevance scores than bi-encoder cosine
-similarity alone.
-
-This reranker sits between the fusion retriever and the LLM generation step:
-    Retrieve top-10 (vector + BM25) → Rerank → Take top-3 → Send to LLM
-"""
+"""Cross-encoder reranking for candidates returned by hybrid retrieval."""
 
 from llama_index.core.schema import NodeWithScore
 
 
 class TelecomReranker:
-    """
-    Wraps a sentence-transformers CrossEncoder for reranking retrieved nodes.
-    Falls back gracefully to score-based ranking if the model fails to load
-    (e.g., no internet on first run and no cached model).
-    """
+    """Wrap a CrossEncoder and fall back to retrieval scores if it is unavailable."""
 
     def __init__(self, model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"):
         try:
             from sentence_transformers import CrossEncoder
             self.model = CrossEncoder(model_name)
             self.available = True
-            print(f"✅ Reranker loaded: {model_name}")
+            print(f"Reranker loaded: {model_name}")
         except Exception as e:
-            print(f"⚠️  Reranker model failed to load: {e}. Falling back to score-based ranking.")
+            print(f"Warning: Reranker model could not be loaded: {e}. Using retrieval scores instead.")
             self.model = None
             self.available = False
 
@@ -38,31 +23,21 @@ class TelecomReranker:
         nodes_with_scores: list[NodeWithScore],
         top_n: int = 3,
     ) -> list[NodeWithScore]:
-        """
-        Rerank a list of NodeWithScore using the cross-encoder.
-
-        Args:
-            query:              The user's search query.
-            nodes_with_scores:  Candidate nodes from the fusion retriever.
-            top_n:              Number of top results to return after reranking.
-
-        Returns:
-            Reranked list of NodeWithScore (length <= top_n).
-        """
+        """Rerank candidates for a query and return at most ``top_n`` nodes."""
         if not self.available or not nodes_with_scores:
             return nodes_with_scores[:top_n]
 
-        # Build (query, passage) pairs for the cross-encoder
+        # Score each query and passage pair together.
         pairs = [(query, node.node.get_content()) for node in nodes_with_scores]
         scores = self.model.predict(pairs)
 
-        # Pair each node with its reranker score, sort descending
+        # Sort candidates by their cross-encoder scores.
         scored = list(zip(nodes_with_scores, scores))
         scored.sort(key=lambda x: x[1], reverse=True)
 
         result = []
         for node_with_score, rerank_score in scored[:top_n]:
-            # Replace the original retrieval score with the reranker score
+            # Use the reranker score in the final result.
             node_with_score.score = float(rerank_score)
             result.append(node_with_score)
 

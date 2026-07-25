@@ -8,11 +8,7 @@ from llama_index.core.extractors import BaseExtractor
 
 
 class TelecomMetadataExtractor(BaseExtractor):
-    """
-    Custom metadata extractor that uses Regex to identify Alarm Codes
-    and Equipment Vendors from the document text.
-    In a real-world scenario, this might use an LLM for complex extraction.
-    """
+    """Extract basic telecom metadata from a chunk with regular expressions."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -29,26 +25,26 @@ class TelecomMetadataExtractor(BaseExtractor):
         """Apply regex patterns to find specific telecom entities."""
         metadata = {}
 
-        # Extract Alarm Code (e.g. ALARM_CODE_404, ALARM_501)
+        # Match alarm codes such as ALARM_CODE_404 and ALARM_501.
         alarm_match = re.search(r'ALARM(?:_CODE)?_(\d+)', text, re.IGNORECASE)
         if alarm_match:
             metadata["alarm_code"] = alarm_match.group(1)
 
-        # Extract Vendor (expanded to include Arista)
+        # Match a supported equipment vendor.
         vendors = ["Cisco", "Nokia", "Juniper", "Ericsson", "Huawei", "Arista"]
         for vendor in vendors:
             if vendor.lower() in text.lower():
                 metadata["equipment_vendor"] = vendor
                 break
 
-        # If no vendor found in chunk, we don't set it (pipeline will propagate)
+        # The pipeline can add the document vendor when this is missing.
 
-        # Extract Severity
+        # Match the alarm severity.
         severity_match = re.search(r'Severity:\s*(Critical|Major|Minor|Warning)', text, re.IGNORECASE)
         if severity_match:
             metadata["severity"] = severity_match.group(1).title()
 
-        # Extract Node ID
+        # Match the node ID.
         node_match = re.search(r'NodeID:\s*([\w-]+)', text, re.IGNORECASE)
         if node_match:
             metadata["node_id"] = node_match.group(1)
@@ -57,20 +53,10 @@ class TelecomMetadataExtractor(BaseExtractor):
 
 
 def get_markdown_chunker():
-    """
-    Returns a MarkdownNodeParser for .md documents.
-    Chunks text by Header (e.g. ## Procedure X), guaranteeing
-    that all steps under a procedure stay in the same node.
-    """
+    """Return a header-based chunker for Markdown documents."""
     return MarkdownNodeParser()
 
 
 def get_pdf_chunker():
-    """
-    Returns a SentenceSplitter for .pdf documents.
-    PDF text loaded via PyPDF comes out as flat, unstructured plain text
-    with no Markdown headers. MarkdownNodeParser would produce a single
-    giant blob on PDF content — SentenceSplitter handles it correctly
-    by splitting on sentence boundaries with a fixed token budget.
-    """
+    """Return a sentence-based chunker for text extracted from PDFs."""
     return SentenceSplitter(chunk_size=512, chunk_overlap=64)

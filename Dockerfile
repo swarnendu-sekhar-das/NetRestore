@@ -1,59 +1,55 @@
-# ---- Build Stage ----
-# Uses a builder pattern to compile all C-extension dependencies (chromadb, torch)
-# in a separate layer, keeping the final image lightweight and secure.
+# Build dependencies in a separate stage.
 FROM python:3.11-slim AS builder
 
 WORKDIR /app
-# Step 1: Install uv, then install heavy ML dependencies (PyTorch) via the CPU-only index.
-# This layer is ~1GB+ and cached independently of your code or requirements.txt.
+# Install PyTorch from the CPU-only package index.
 RUN pip install --no-cache-dir uv && \
     uv pip install --system torch torchvision \
         --index-url https://download.pytorch.org/whl/cpu
 
-# Step 2: Install application-specific requirements.
-# Changing requirements.txt triggers only a small layer rebuild, NOT a re-download of torch.
+# Install the application requirements.
 COPY requirements.txt .
 RUN uv pip install --system -r requirements.txt
 
-# ---- Runtime Stage ----
+# Runtime image.
 FROM python:3.11-slim
 
-# Install curl for Docker healthchecks
+# Install curl for the health check.
 RUN apt-get update && apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Create non-root user for security (container best practice)
+# Run the application as a non-root user.
 RUN useradd -m -s /bin/bash appuser
 
-# Copy installed packages from builder stage (entire local Python env)
+# Copy installed Python packages from the build stage.
 COPY --from=builder /usr/local/lib /usr/local/lib
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Copy application code and automation scripts
+# Copy application code and scripts.
 COPY src/ ./src/
 COPY data/ ./data/
 COPY notebooks/ ./notebooks/
 COPY scripts/ ./scripts/
 
-# Models will be downloaded dynamically at runtime into the mounted HF_HOME volume
+# Store downloaded Hugging Face models in the application cache directory.
 ENV HF_HOME=/app/.cache/huggingface
 
-# Pre-create chroma_db directory and ensure script is executable
+# Create the database directory and set script permissions.
 RUN mkdir -p /app/chroma_db && \
     chmod +x /app/scripts/start.sh && \
     chown -R appuser:appuser /app
 
-# Health-check endpoint for Docker healthcheck
+# Check that Streamlit responds on its health endpoint.
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
   CMD curl -f http://localhost:8501/_stcore/health || exit 1
 
-# Expose Streamlit default port
+# Streamlit listens on this port.
 EXPOSE 8501
 
-# Run as non-root user
+# Switch to the application user.
 USER appuser
 
-# Use the startup wrapper script to handle auto-initialization
+# Start the application through the startup script.
 ENTRYPOINT ["/app/scripts/start.sh"]

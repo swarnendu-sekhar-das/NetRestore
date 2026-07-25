@@ -1,9 +1,4 @@
-"""
-Hybrid Search Module
-
-Combines keyword search (BM25) and vector search (embeddings) to find 
-the best documents. Then uses a reranker model to pick the absolute best ones.
-"""
+"""Hybrid retrieval using dense search, BM25, RRF, and reranking."""
 
 from llama_index.core.retrievers import BaseRetriever, VectorIndexRetriever
 from llama_index.core.vector_stores import MetadataFilters, ExactMatchFilter
@@ -14,27 +9,21 @@ from src.retrieval.reranker import TelecomReranker
 
 
 class TelecomHybridRetriever:
-    """
-    Sets up the search engine.
-    Loads the vector database, creates the BM25 keyword index, 
-    and loads the reranker model.
-    """
+    """Create the dense, BM25, and reranking parts of the retriever."""
 
     def __init__(self, vector_store_manager, similarity_top_k: int = 10):
         self.vs_manager = vector_store_manager
         self.index = vector_store_manager.get_index()
         self.similarity_top_k = similarity_top_k
 
-        # Build BM25 index from all documents in ChromaDB
+        # Build a local BM25 index from the stored documents.
         self._build_bm25_index()
 
-        # Initialize cross-encoder reranker (loads ~80MB model)
+        # Load the cross-encoder used for final ranking.
         self.reranker = TelecomReranker()
 
     def _build_bm25_index(self):
-        """
-        Gets all documents from the database and creates a keyword search index.
-        """
+        """Build the in-memory BM25 index from the ChromaDB collection."""
         collection = self.vs_manager.chroma_collection
         results = collection.get(include=["documents", "metadatas"])
 
@@ -43,22 +32,18 @@ class TelecomHybridRetriever:
         self.bm25_corpus_metas = results["metadatas"]
 
         if not self.bm25_corpus_docs:
-            print("⚠️  ChromaDB collection is empty. BM25 index not built.")
+            print("Warning: ChromaDB collection is empty. BM25 index was not built.")
             self.bm25 = None
             return
 
-        # Tokenize documents for BM25 (simple whitespace + lowercase)
+        # BM25 uses lower-case whitespace tokenization here.
         tokenized = [doc.lower().split() for doc in self.bm25_corpus_docs]
         self.bm25 = BM25Okapi(tokenized)
-        print(f"✅ BM25 index built over {len(self.bm25_corpus_docs)} documents.")
+        print(f"BM25 index built for {len(self.bm25_corpus_docs)} documents.")
 
     def get_retriever(self, filters: dict = None):
-        """
-        Returns a TelecomFusionRetriever configured with the given metadata
-        filters.  This retriever implements the LlamaIndex BaseRetriever
-        interface so it plugs directly into ContextChatEngine.
-        """
-        # Build LlamaIndex metadata filters for the vector retriever
+        """Return a fusion retriever configured with optional metadata filters."""
+        # Convert the dictionary into LlamaIndex metadata filters.
         llama_filters = None
         if filters:
             filter_params = [
@@ -67,7 +52,7 @@ class TelecomHybridRetriever:
             ]
             llama_filters = MetadataFilters(filters=filter_params)
 
-        # Create the vector retriever with filters
+        # Use the same filters for the dense retriever.
         vector_retriever = VectorIndexRetriever(
             index=self.index,
             similarity_top_k=self.similarity_top_k,
@@ -93,12 +78,7 @@ class TelecomHybridRetriever:
 
 
 class TelecomFusionRetriever(BaseRetriever):
-    """
-    Custom LlamaIndex retriever that fuses BM25 + Vector results using
-    Reciprocal Rank Fusion, then reranks with a cross-encoder.
-
-    Extends BaseRetriever so it plugs directly into ContextChatEngine.
-    """
+    """Fuse dense and BM25 results, then rerank the candidates."""
 
     def __init__(
         self,
@@ -124,37 +104,31 @@ class TelecomFusionRetriever(BaseRetriever):
         self._rerank_top_n = rerank_top_n
 
     def _retrieve(self, query_bundle: QueryBundle) -> list[NodeWithScore]:
-        """
-        Core retrieval logic:
-          1. Vector retrieval (with metadata filters)
-          2. BM25 retrieval   (with metadata filters, post-hoc)
-          3. Reciprocal Rank Fusion
-          4. Cross-encoder reranking
-        """
+        """Retrieve dense and BM25 candidates, fuse them, and rerank them."""
         query = query_bundle.query_str
 
-        # ── Step 1: Dense vector retrieval ──
+        # Retrieve semantic matches from the vector index.
         vector_results = self._vector_retriever.retrieve(query)
 
-        # ── Step 2: Sparse BM25 retrieval ──
+        # Retrieve keyword matches from the BM25 index.
         if self._bm25 is not None:
             bm25_results = self._bm25_search(query, top_k=self._similarity_top_k)
         else:
             bm25_results = []
 
-        # ── Step 3: Reciprocal Rank Fusion ──
+        # Combine the two ranked result lists.
         if bm25_results:
             fused = self._reciprocal_rank_fusion(vector_results, bm25_results)
         else:
             fused = vector_results
 
-        # ── Step 4: Cross-encoder reranking ──
+        # Use the cross-encoder to rank the remaining candidates.
         if self._reranker and len(fused) > 0:
             return self._reranker.rerank(query, fused, top_n=self._rerank_top_n)
 
         return fused[: self._rerank_top_n]
 
-    # ----- BM25 search with metadata filtering -----
+    # BM25 search with metadata filtering.
 
     def _bm25_search(self, query: str, top_k: int = 10) -> list[NodeWithScore]:
         """
@@ -163,7 +137,7 @@ class TelecomFusionRetriever(BaseRetriever):
         tokenized_query = query.lower().split()
         scores = self._bm25.get_scores(tokenized_query)
 
-        # Pair each document index with its BM25 score, filter by metadata
+        # Keep positive scores that match the active metadata filters.
         candidates = []
         for idx, score in enumerate(scores):
             if score <= 0:
@@ -172,11 +146,11 @@ class TelecomFusionRetriever(BaseRetriever):
             if self._matches_filters(meta):
                 candidates.append((idx, score))
 
-        # Sort by BM25 score descending, take top-k
+        # Sort by score and keep the requested number of results.
         candidates.sort(key=lambda x: x[1], reverse=True)
         top_candidates = candidates[:top_k]
 
-        # Reconstruct as LlamaIndex NodeWithScore objects
+        # Convert BM25 results back into LlamaIndex nodes.
         results = []
         for idx, score in top_candidates:
             node = TextNode(
@@ -197,7 +171,7 @@ class TelecomFusionRetriever(BaseRetriever):
                 return False
         return True
 
-    # ----- Reciprocal Rank Fusion -----
+    # Reciprocal Rank Fusion.
 
     @staticmethod
     def _reciprocal_rank_fusion(
@@ -228,7 +202,7 @@ class TelecomFusionRetriever(BaseRetriever):
             if node_id not in node_map:
                 node_map[node_id] = result
 
-        # Sort by fused score descending
+        # Return results in descending fused-score order.
         sorted_ids = sorted(fused_scores.keys(), key=lambda nid: fused_scores[nid], reverse=True)
 
         fused = []

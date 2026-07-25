@@ -1,45 +1,33 @@
-"""
-ChromaDB Inspection Script for NetRestore
-
-This utility script provides a quick inspection of the ChromaDB vector store
-to verify document ingestion, examine metadata, and preview content samples.
-
-Usage:
-    python scratch/inspect_db.py
-
-Note: This is a development/debugging tool and should not be used in production.
-"""
+"""Print a small sample from the local ChromaDB collection for debugging."""
 
 import chromadb
 import os
 
-# Database path configuration
+# Local database path used by this helper.
 db_path = "/Users/swarnendusekhardas/SSD_Files/Workspace/SPE Major Project/chroma_db"
 
-# Check if the database exists
+# Stop if the database has not been created yet.
 if not os.path.exists(db_path):
-    print("❌ ChromaDB not found at the specified path.")
+    print("Error: ChromaDB was not found at the configured path.")
     print(f"   Path: {db_path}")
     print("   Please run the data ingestion pipeline first.")
 else:
-    # Initialize ChromaDB persistent client
+    # Open the local ChromaDB client.
     client = chromadb.PersistentClient(path=db_path)
     
-    # Access the telecom SOPs collection
+    # Read the telecom SOP collection.
     collection = client.get_collection("telecom_sops")
     
-    # Retrieve a sample of documents with their metadata
+    # Read a small set of documents and their metadata.
     results = collection.get(limit=10)
     
-    print(f"📊 NetRestore ChromaDB Inspection Results")
+    print("NetRestore ChromaDB inspection results")
     print(f"   Collection: telecom_sops")
     print(f"   Sample Size: {len(results['ids'])} documents")
-    print(f"{'=' * 60}")
     
-    # Display document information
+    # Print details for each sample document.
     for i in range(len(results['ids'])):
-        print(f"\n📄 Document {i + 1}:")
+        print(f"Document {i + 1}:")
         print(f"   ID: {results['ids'][i]}")
         print(f"   Metadata: {results['metadatas'][i]}")
-        print(f"   Content Preview: {results['documents'][i][:100]}...")
-        print(f"{'─' * 60}")
+        print(f"Content preview: {results['documents'][i][:100]}")

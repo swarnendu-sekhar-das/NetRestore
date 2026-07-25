@@ -1,19 +1,8 @@
-"""
-Phase 2/3 Integration Test: Full Data Pipeline + Hybrid Retrieval
-
-This script serves dual purposes:
-  1. DATA INGESTION — Runs the full pipeline (load → chunk → embed → store in ChromaDB)
-     Called by start.sh on first container boot.
-  2. INTEGRATION TEST — Tests hybrid retrieval (BM25 + vector + reranking)
-     with sample queries and vendor filters.
-
-Usage:
-    python notebooks/test_retrieval.py
-"""
+"""Run a local ingestion and hybrid-retrieval smoke test."""
 import sys
 import os
 
-# Add src to the path so we can import modules
+# Add the project root so the src package can be imported.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.data_engineering.pipeline import DataPipeline
@@ -22,18 +11,18 @@ from src.retrieval.hybrid_search import TelecomHybridRetriever
 
 
 def main():
-    print("--- Phase 2: Loading & Chunking Data ---")
-    data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
+    print("Loading and chunking SOP data.")
+    data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "sops"))
     pipeline = DataPipeline(data_dir=data_dir)
     nodes = pipeline.run()
 
-    # Filter out empty nodes if any appeared due to formatting
+    # Skip chunks that contain no text.
     clean_nodes = [n for n in nodes if n.get_content().strip()]
 
-    print("\n--- Phase 3: Initializing Vector Store ---")
+    print("Initializing the vector store.")
     db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "chroma_db"))
 
-    # Clear previous testing DBs safely (avoiding mount point errors)
+    # Clear the old local test database before running this script.
     if os.path.exists(db_path):
         print(f"Clearing contents of old DB at {db_path} for clean test...")
         for filename in os.listdir(db_path):
@@ -49,10 +38,10 @@ def main():
 
     vs_manager = TelecomVectorStore(db_path=db_path)
 
-    # Embed and Insert Nodes into Chroma
+    # Embed the chunks and store them in ChromaDB.
     vs_manager.insert_nodes(clean_nodes)
 
-    print("\n--- Phase 3: Testing Hybrid Search Retrieval (BM25 + Vector + Reranker) ---")
+    print("Testing hybrid retrieval.")
     retriever = TelecomHybridRetriever(vector_store_manager=vs_manager, similarity_top_k=10)
 
     queries = [
@@ -75,23 +64,23 @@ def main():
     ]
 
     for q in queries:
-        print(f"\nQUERY: '{q['prompt']}' | FILTERS: {q['filters']}")
+        print(f"Query: '{q['prompt']}'. Filters: {q['filters']}")
         results = retriever.search(query=q["prompt"], filters=q["filters"])
 
         if not results:
-            print("  ⚠️  No results returned.")
+            print("Warning: No results returned.")
             continue
 
         for i, node_with_score in enumerate(results):
             score = node_with_score.score
             node = node_with_score.node
-            print(f"  -> Result {i+1} (Reranker Score: {score:.4f}):")
-            print(f"     Title/Header: {node.metadata.get('header_path', 'No Header')}")
+            print(f"Result {i + 1}. Reranker score: {score:.4f}.")
+            print(f"Title or header: {node.metadata.get('header_path', 'No Header')}")
             preview = node.get_content()[:150].replace("\n", " ")
-            print(f"     Content: {preview}...")
-            print(f"     Metadata: {node.metadata}")
+            print(f"Content: {preview}")
+            print(f"Metadata: {node.metadata}")
 
-    print("\n✅ Phase 2/3 Integration Test Complete.")
+    print("Integration test complete.")
 
 
 if __name__ == "__main__":

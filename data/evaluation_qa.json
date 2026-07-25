@@ -1,38 +1,220 @@
 [
   {
-    "query": "How to clear a Critical alarm on Nokia-Core-Delhi-NCR-1?",
+    "query": "How do I clear ALARM_3257 on Nokia-Core-Delhi-NCR-1?",
+    "expected_file_name": "NOKIA-CORE-DELHI-NCR-1_ALARM_3257_SOP.pdf",
     "expected_vendor": "Nokia",
+    "expected_alarm_code": "3257",
     "expected_node_id": "Nokia-Core-Delhi-NCR-1",
-    "expected_keywords": ["BGP", "cascade", "Core Router", "Nokia"],
-    "reference_answer": "Verify the Critical alarm on Nokia-Core-Delhi-NCR-1. Because it is a Core Router, its failure will cascade to all connected Provider Edge nodes in the Delhi-NCR region. Run diagnostic commands to check routing protocols and apply the resolution steps."
+    "filters": {"equipment_vendor": "Nokia", "alarm_code": "3257"},
+    "expected_keywords": ["Nokia", "ALARM_3257"]
   },
   {
-    "query": "What is the procedure for an alarm on Ericsson-PE-Mumbai-MH-2?",
-    "expected_vendor": "Ericsson",
-    "expected_node_id": "Ericsson-PE-Mumbai-MH-2",
-    "expected_keywords": ["Ericsson", "Provider Edge Router", "Access Switch"],
-    "reference_answer": "For an alarm on Ericsson-PE-Mumbai-MH-2, check the PE router logs. If it fails, only the local Access Switches connected to it in the Mumbai-MH region are affected. Follow the diagnostic and resolution commands provided."
+    "query": "Procedure for ALARM_3481 on Nokia-Core-Bangalore-KA-2",
+    "expected_file_name": "NOKIA-CORE-BANGALORE-KA-2_ALARM_3481_SOP.pdf",
+    "expected_vendor": "Nokia",
+    "expected_alarm_code": "3481",
+    "expected_node_id": "Nokia-Core-Bangalore-KA-2",
+    "filters": {"equipment_vendor": "Nokia", "alarm_code": "3481"},
+    "expected_keywords": ["Nokia", "ALARM_3481"]
   },
   {
-    "query": "How to fix ALARM_5527 on Cisco-Core-Bangalore-KA-1?",
+    "query": "How should I resolve ALARM_1131 on Juniper-Core-Chennai-TN-1?",
+    "expected_file_name": "JUNIPER-CORE-CHENNAI-TN-1_ALARM_1131_SOP.pdf",
+    "expected_vendor": "Juniper",
+    "expected_alarm_code": "1131",
+    "expected_node_id": "Juniper-Core-Chennai-TN-1",
+    "filters": {"equipment_vendor": "Juniper", "alarm_code": "1131"},
+    "expected_keywords": ["Juniper", "ALARM_1131"]
+  },
+  {
+    "query": "Find the recovery SOP for ALARM_1920 on Cisco-Access-Delhi-NCR-16.",
+    "expected_file_name": "CISCO-ACCESS-DELHI-NCR-16_ALARM_1920_SOP.pdf",
     "expected_vendor": "Cisco",
-    "expected_node_id": "Cisco-Core-Bangalore-KA-1",
-    "expected_alarm_code": "5527",
-    "expected_keywords": ["Cisco", "Core Router", "ALARM_5527", "Bangalore-KA"],
-    "reference_answer": "Identify ALARM_5527 on Cisco-Core-Bangalore-KA-1. Since it's a Core router in Bangalore, note the potential pan-India backbone reconvergence. Run the specific diagnostic CLI commands, execute the resolution steps, and verify."
+    "expected_alarm_code": "1920",
+    "expected_node_id": "Cisco-Access-Delhi-NCR-16",
+    "filters": {"equipment_vendor": "Cisco", "alarm_code": "1920"},
+    "expected_keywords": ["Cisco", "ALARM_1920"]
   },
   {
-    "query": "What happens if Arista-Access-Chennai-TN-1 fails?",
-    "expected_vendor": "Arista",
-    "expected_node_id": "Arista-Access-Chennai-TN-1",
-    "expected_keywords": ["Arista", "Access Switch", "Chennai-TN", "traffic drops"],
-    "reference_answer": "If Arista-Access-Chennai-TN-1 fails, it is an Access Switch, so local customer traffic drops but the backbone is unaffected. Check the physical link and run resolution steps."
+    "query": "What is the SOP for ALARM_1851 on Ericsson-PE-Mumbai-MH-35?",
+    "expected_file_name": "ERICSSON-PE-MUMBAI-MH-35_ALARM_1851_SOP.pdf",
+    "expected_vendor": "Ericsson",
+    "expected_alarm_code": "1851",
+    "expected_node_id": "Ericsson-PE-Mumbai-MH-35",
+    "filters": {"equipment_vendor": "Ericsson", "alarm_code": "1851"},
+    "expected_keywords": ["Ericsson", "ALARM_1851"]
   },
   {
-    "query": "Procedure for Huawei-PE-Kolkata-WB-3?",
+    "query": "How do I troubleshoot ALARM_3826 on Huawei-PE-Mumbai-MH-57?",
+    "expected_file_name": "HUAWEI-PE-MUMBAI-MH-57_ALARM_3826_SOP.pdf",
     "expected_vendor": "Huawei",
-    "expected_node_id": "Huawei-PE-Kolkata-WB-3",
-    "expected_keywords": ["Huawei", "PE Router", "Kolkata-WB"],
-    "reference_answer": "Troubleshoot the Provider Edge router Huawei-PE-Kolkata-WB-3 using Huawei specific commands. Be aware of the downstream Access Switches that rely on it."
+    "expected_alarm_code": "3826",
+    "expected_node_id": "Huawei-PE-Mumbai-MH-57",
+    "filters": {"equipment_vendor": "Huawei", "alarm_code": "3826"},
+    "expected_keywords": ["Huawei", "ALARM_3826"]
+  },
+  {
+    "query": "Give the restoration steps for ALARM_8112 on Arista-Access-Delhi-NCR-34.",
+    "expected_file_name": "ARISTA-ACCESS-DELHI-NCR-34_ALARM_8112_SOP.pdf",
+    "expected_vendor": "Arista",
+    "expected_alarm_code": "8112",
+    "expected_node_id": "Arista-Access-Delhi-NCR-34",
+    "filters": {"equipment_vendor": "Arista", "alarm_code": "8112"},
+    "expected_keywords": ["Arista", "ALARM_8112"]
+  },
+  {
+    "query": "What should an operator do for ALARM_6500 on Cisco-Access-Chennai-TN-108?",
+    "expected_file_name": "CISCO-ACCESS-CHENNAI-TN-108_ALARM_6500_SOP.pdf",
+    "expected_vendor": "Cisco",
+    "expected_alarm_code": "6500",
+    "expected_node_id": "Cisco-Access-Chennai-TN-108",
+    "filters": {"equipment_vendor": "Cisco", "alarm_code": "6500"},
+    "expected_keywords": ["Cisco", "ALARM_6500"]
+  },
+  {
+    "query": "Show the Juniper Provider Edge procedure for ALARM_1300.",
+    "expected_file_name": "JUNIPER-PE-DELHI-NCR-28_ALARM_1300_SOP.pdf",
+    "expected_vendor": "Juniper",
+    "expected_alarm_code": "1300",
+    "expected_node_id": "Juniper-PE-Delhi-NCR-28",
+    "filters": {"equipment_vendor": "Juniper"},
+    "expected_keywords": ["Juniper", "ALARM_1300"]
+  },
+  {
+    "query": "How can I recover from the critical hardware failure indicated by ALARM_4107 on Huawei-Access-Delhi-NCR-22?",
+    "expected_file_name": "HUAWEI-ACCESS-DELHI-NCR-22_ALARM_4107_SOP.pdf",
+    "expected_vendor": "Huawei",
+    "expected_alarm_code": "4107",
+    "expected_node_id": "Huawei-Access-Delhi-NCR-22",
+    "filters": {"equipment_vendor": "Huawei"},
+    "expected_keywords": ["Huawei", "ALARM_4107"]
+  },
+  {
+    "query": "I need the warning-alarm procedure for Arista-PE-Bangalore-KA-76, alarm 3828.",
+    "expected_file_name": "ARISTA-PE-BANGALORE-KA-76_ALARM_3828_SOP.pdf",
+    "expected_vendor": "Arista",
+    "expected_alarm_code": "3828",
+    "expected_node_id": "Arista-PE-Bangalore-KA-76",
+    "filters": {"equipment_vendor": "Arista"},
+    "expected_keywords": ["Arista", "ALARM_3828"]
+  },
+  {
+    "query": "Find the Nokia Provider Edge SOP for ALARM_2387 in Chennai.",
+    "expected_file_name": "NOKIA-PE-CHENNAI-TN-100_ALARM_2387_SOP.pdf",
+    "expected_vendor": "Nokia",
+    "expected_alarm_code": "2387",
+    "expected_node_id": "Nokia-PE-Chennai-TN-100",
+    "filters": {"equipment_vendor": "Nokia"},
+    "expected_keywords": ["Nokia", "ALARM_2387"]
+  },
+  {
+    "query": "What diagnostic procedure is documented for ALARM_2840 on Juniper-Core-Mumbai-MH-1?",
+    "expected_file_name": "JUNIPER-CORE-MUMBAI-MH-1_ALARM_2840_SOP.pdf",
+    "expected_vendor": "Juniper",
+    "expected_alarm_code": "2840",
+    "expected_node_id": "Juniper-Core-Mumbai-MH-1",
+    "filters": {"node_id": "Juniper-Core-Mumbai-MH-1"},
+    "expected_keywords": ["Juniper", "ALARM_2840"]
+  },
+  {
+    "query": "How should I investigate the hardware or software configuration issue reported by ALARM_3290 on Cisco-Access-Mumbai-MH-52?",
+    "expected_file_name": "CISCO-ACCESS-MUMBAI-MH-52_ALARM_3290_SOP.pdf",
+    "expected_vendor": "Cisco",
+    "expected_alarm_code": "3290",
+    "expected_node_id": "Cisco-Access-Mumbai-MH-52",
+    "filters": {"node_id": "Cisco-Access-Mumbai-MH-52"},
+    "expected_keywords": ["Cisco", "ALARM_3290"]
+  },
+  {
+    "query": "Give me the critical-alarm remediation SOP for Ericsson-Access-Kolkata-WB-118, ALARM_3199.",
+    "expected_file_name": "ERICSSON-ACCESS-KOLKATA-WB-118_ALARM_3199_SOP.pdf",
+    "expected_vendor": "Ericsson",
+    "expected_alarm_code": "3199",
+    "expected_node_id": "Ericsson-Access-Kolkata-WB-118",
+    "filters": {"node_id": "Ericsson-Access-Kolkata-WB-118"},
+    "expected_keywords": ["Ericsson", "ALARM_3199"]
+  },
+  {
+    "query": "What recovery steps are available for the Huawei Access Switch alarm 8997 in Bangalore?",
+    "expected_file_name": "HUAWEI-ACCESS-BANGALORE-KA-66_ALARM_8997_SOP.pdf",
+    "expected_vendor": "Huawei",
+    "expected_alarm_code": "8997",
+    "expected_node_id": "Huawei-Access-Bangalore-KA-66",
+    "filters": {"node_id": "Huawei-Access-Bangalore-KA-66"},
+    "expected_keywords": ["Huawei", "ALARM_8997"]
+  },
+  {
+    "query": "How do I identify and resolve the minor alarm on Arista 7250X at Chennai-TN-90?",
+    "expected_file_name": "ARISTA-ACCESS-CHENNAI-TN-90_ALARM_7199_SOP.pdf",
+    "expected_vendor": "Arista",
+    "expected_alarm_code": "7199",
+    "expected_node_id": "Arista-Access-Chennai-TN-90",
+    "filters": {"node_id": "Arista-Access-Chennai-TN-90"},
+    "expected_keywords": ["Arista", "ALARM_7199"]
+  },
+  {
+    "query": "How should a technician resolve ALARM_2203 on Nokia-Core-Kolkata-WB-1?",
+    "expected_file_name": "NOKIA-CORE-KOLKATA-WB-1_ALARM_2203_SOP.pdf",
+    "expected_vendor": "Nokia",
+    "expected_alarm_code": "2203",
+    "expected_node_id": "Nokia-Core-Kolkata-WB-1",
+    "expected_keywords": ["Nokia", "ALARM_2203"]
+  },
+  {
+    "query": "Need the major-alarm SOP for Cisco-PE-Delhi-NCR-33, ALARM_4787.",
+    "expected_file_name": "CISCO-PE-DELHI-NCR-33_ALARM_4787_SOP.pdf",
+    "expected_vendor": "Cisco",
+    "expected_alarm_code": "4787",
+    "expected_node_id": "Cisco-PE-Delhi-NCR-33",
+    "expected_keywords": ["Cisco", "ALARM_4787"]
+  },
+  {
+    "query": "Which procedure diagnoses and resolves ALARM_8916 on Ericsson-PE-Delhi-NCR-23?",
+    "expected_file_name": "ERICSSON-PE-DELHI-NCR-23_ALARM_8916_SOP.pdf",
+    "expected_vendor": "Ericsson",
+    "expected_alarm_code": "8916",
+    "expected_node_id": "Ericsson-PE-Delhi-NCR-23",
+    "expected_keywords": ["Ericsson", "ALARM_8916"]
+  },
+  {
+    "query": "Help resolve the major alarm on Huawei-PE-Bangalore-KA-71 with code 7501.",
+    "expected_file_name": "HUAWEI-PE-BANGALORE-KA-71_ALARM_7501_SOP.pdf",
+    "expected_vendor": "Huawei",
+    "expected_alarm_code": "7501",
+    "expected_node_id": "Huawei-PE-Bangalore-KA-71",
+    "expected_keywords": ["Huawei", "ALARM_7501"]
+  },
+  {
+    "query": "What is the SOP for the major issue ALARM_3573 on Arista-Access-Kolkata-WB-116?",
+    "expected_file_name": "ARISTA-ACCESS-KOLKATA-WB-116_ALARM_3573_SOP.pdf",
+    "expected_vendor": "Arista",
+    "expected_alarm_code": "3573",
+    "expected_node_id": "Arista-Access-Kolkata-WB-116",
+    "expected_keywords": ["Arista", "ALARM_3573"]
+  },
+  {
+    "query": "How do I handle the critical alarm reported on Nokia-Core-Delhi-NCR-2?",
+    "expected_file_name": "NOKIA-CORE-DELHI-NCR-2_ALARM_1546_SOP.pdf",
+    "expected_vendor": "Nokia",
+    "expected_alarm_code": "1546",
+    "expected_node_id": "Nokia-Core-Delhi-NCR-2",
+    "filters": {"node_id": "Nokia-Core-Delhi-NCR-2", "alarm_code": "1546"},
+    "expected_keywords": ["Nokia", "ALARM_1546"]
+  },
+  {
+    "query": "Find the SOP for the minor Ericsson access-switch alarm ALARM_5811 at Bangalore-KA-84.",
+    "expected_file_name": "ERICSSON-ACCESS-BANGALORE-KA-84_ALARM_5811_SOP.pdf",
+    "expected_vendor": "Ericsson",
+    "expected_alarm_code": "5811",
+    "expected_node_id": "Ericsson-Access-Bangalore-KA-84",
+    "expected_keywords": ["Ericsson", "ALARM_5811"]
+  },
+  {
+    "query": "What verification and recovery procedure is documented for warning ALARM_2110 on Cisco-PE-Kolkata-WB-124?",
+    "expected_file_name": "CISCO-PE-KOLKATA-WB-124_ALARM_2110_SOP.pdf",
+    "expected_vendor": "Cisco",
+    "expected_alarm_code": "2110",
+    "expected_node_id": "Cisco-PE-Kolkata-WB-124",
+    "expected_keywords": ["Cisco", "ALARM_2110"]
   }
 ]

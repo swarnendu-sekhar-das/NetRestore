@@ -1,10 +1,6 @@
 from llama_index.core import PromptTemplate
 
-#
-# Chain-of-Thought System Prompt for Conversational Procedural QA
-# This instructs the LLM to reason step-by-step before answering,
-# and to maintain context across follow-up questions using chat history.
-#
+# Main prompt for procedural answers with chat history.
 SYSTEM_PROMPT = (
     "You are an expert Network Support Engineer with deep knowledge of "
     "Nokia, Cisco, Juniper, Ericsson, and Huawei equipment.\n\n"
@@ -31,21 +27,14 @@ SYSTEM_PROMPT = (
     "- If a follow-up question is ambiguous, infer the context from the most recent Q&A exchange.\n"
 )
 
-#
-# Template for injecting network topology context into the system prompt.
-# {topology_context} is dynamically filled by qa_engine.py based on the
-# vendor identified in the query or sidebar filter.
-#
+# Template used when topology context is available.
 TOPOLOGY_CONTEXT_TEMPLATE = (
     "\n\n--- NETWORK TOPOLOGY CONTEXT ---\n"
     "{topology_context}\n"
     "--- END TOPOLOGY CONTEXT ---\n"
 )
 
-#
-# Context-aware QA template used by ContextChatEngine.
-# The {context_str} and {query_str} placeholders are filled by LlamaIndex.
-#
+# Template used by the contextual chat engine.
 CONTEXT_QA_PROMPT_TMPL = (
     "Context information from the retrieved Standard Operating Procedures (SOPs) is below.\n"
     "---------------------\n"
@@ -59,9 +48,7 @@ CONTEXT_QA_PROMPT_TMPL = (
 
 procedural_qa_prompt = PromptTemplate(CONTEXT_QA_PROMPT_TMPL)
 
-#
-# Legacy single-shot prompt (kept for backward compatibility with test scripts)
-#
+# Stateless prompt used by evaluation and older test scripts.
 PROCEDURAL_QA_PROMPT_TMPL = (
     "You are an expert Network Support Engineer. Your only job is to provide exact, "
     "step-by-step Standard Operating Procedures (SOPs) based STRICTLY on the provided context.\n"
@@ -84,9 +71,7 @@ PROCEDURAL_QA_PROMPT_TMPL = (
 
 legacy_procedural_qa_prompt = PromptTemplate(PROCEDURAL_QA_PROMPT_TMPL)
 
-#
-# Out-of-scope response for the query router
-#
+# Response returned for queries outside the telecom scope.
 OUT_OF_SCOPE_RESPONSE = (
     "I'm a specialized Network Support assistant. I can only answer "
     "questions about network alarms, Standard Operating Procedures (SOPs), "

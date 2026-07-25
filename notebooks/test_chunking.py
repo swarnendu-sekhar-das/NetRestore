@@ -1,9 +1,4 @@
-"""
-CI Unit Tests: Data Pipeline Chunking
-Verifies DataPipeline loads and chunks SOP documents correctly.
-Jenkins runs this in the 'Lint & Unit Test' stage via:
-  python -m pytest notebooks/test_chunking.py -v
-"""
+"""Basic tests for SOP loading, chunking, and metadata extraction."""
 import os
 import sys
 import pytest
@@ -12,20 +7,15 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from src.data_engineering.pipeline import DataPipeline
 
-DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
+DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "sops"))
 
 
-def test_all_vendor_files_present():
-    """All 5 vendor SOP files must exist in ./data/"""
-    expected = [
-        "cisco_ios_xr_sop.md",
-        "nokia_router_mop.md",
-        "ericsson_ipos_sop.md",
-        "juniper_junos_sop.md",
-        "huawei_vrp_sop.md",
-    ]
-    for fname in expected:
-        assert os.path.exists(os.path.join(DATA_DIR, fname)), f"Missing: {fname}"
+def test_sop_corpus_contains_only_pdfs():
+    """Production corpus is isolated from application JSON/configuration files."""
+    files = os.listdir(DATA_DIR)
+    assert files, "SOP corpus is empty"
+    assert all(name.lower().endswith(".pdf") for name in files)
+    assert len(files) >= 675
 
 
 def test_pipeline_produces_chunks():

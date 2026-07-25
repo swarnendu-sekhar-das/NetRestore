@@ -26,7 +26,8 @@ wheels/
 *.egg
 
 # Virtual Environments
-.env          # Local environment variables (contains secrets)
+# Local environment variables (contains secrets)
+.env
 .venv
 env/
 venv/

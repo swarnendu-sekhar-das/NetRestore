@@ -5,7 +5,7 @@ import logging
 import time
 import json
 
-# Ensure the src module is in the path
+# Add the project root so the src package can be imported.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from src.retrieval.vector_store import TelecomVectorStore
@@ -16,7 +16,7 @@ from src.llm.topology import NetworkTopologyService
 from src.llm.generator import get_llm_generator
 from llama_index.core.memory import ChatMemoryBuffer
 
-# Configure JSON logging
+# Set up JSON logging for the app.
 logger = logging.getLogger("netrestore")
 if not logger.handlers:
     logger.setLevel(logging.INFO)
@@ -26,22 +26,22 @@ if not logger.handlers:
     ))
     logger.addHandler(handler)
 
-# Configure the Streamlit page
+# Configure the Streamlit page.
 st.set_page_config(
     page_title="NetRestore",
     page_icon="📡",
     layout="wide",
 )
 
-# Custom CSS for professional styling
+# Custom styles for the page.
 st.markdown("""
 <style>
-    /* Global Styles */
+    /* Page layout */
     .main {
         background-color: #f8f9fa;
     }
     
-    /* Header Styling */
+    /* Header */
     .header-container {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 2rem 3rem;
@@ -74,7 +74,7 @@ st.markdown("""
         margin-bottom: 0.5rem;
     }
     
-    /* Sidebar Styling */
+    /* Sidebar */
     .css-1d391kg {
         background-color: #ffffff;
     }
@@ -86,13 +86,13 @@ st.markdown("""
         margin-bottom: 1rem;
     }
     
-    /* Chat Message Styling */
+    /* Chat messages */
     .stChatMessage {
         border-radius: 12px;
         margin-bottom: 1rem;
     }
     
-    /* Button Styling */
+    /* Buttons */
     .stButton > button {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
@@ -108,7 +108,7 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
     
-    /* Input Styling */
+    /* Text inputs */
     .stTextInput > div > div > input {
         border-radius: 8px;
         border: 2px solid #e2e8f0;
@@ -121,14 +121,14 @@ st.markdown("""
         outline: none;
     }
     
-    /* Selectbox Styling */
+    /* Select boxes */
     .stSelectbox > div > div > select {
         border-radius: 8px;
         border: 2px solid #e2e8f0;
         padding: 0.75rem;
     }
     
-    /* Expander Styling */
+    /* Expanders */
     .streamlit-expanderHeader {
         background-color: #f1f5f9;
         border-radius: 8px;
@@ -137,7 +137,7 @@ st.markdown("""
         color: #475569;
     }
     
-    /* Success/Error Messages */
+    /* Status messages */
     .stSuccess {
         background-color: #dcfce7;
         border-left: 4px solid #22c55e;
@@ -159,7 +159,7 @@ st.markdown("""
         border-radius: 8px;
     }
     
-    /* Info Messages */
+    /* Information messages */
     .stInfo {
         background-color: #dbeafe;
         border-left: 4px solid #3b82f6;
@@ -167,7 +167,7 @@ st.markdown("""
         border-radius: 8px;
     }
     
-    /* Footer Styling */
+    /* Footer */
     .footer {
         text-align: center;
         padding: 2rem;
@@ -179,14 +179,14 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize the QA Engine
+# Create the QA engine once for the Streamlit resource cache.
 @st.cache_resource
 def load_qa_engine(api_key: str = None):
     db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "chroma_db"))
     if not os.path.exists(db_path):
         return None
     
-    # We must set the Env variable here immediately so LlamaIndex picks it up during initialization
+    # Set the key before creating the Groq client.
     if api_key:
         os.environ["GROQ_API_KEY"] = api_key
         
@@ -203,7 +203,7 @@ def load_qa_engine(api_key: str = None):
         llm=llm
     )
 
-# Header Information
+# Display the page header.
 st.markdown("""
 <div class="header-container">
     <div class="header-icon">📡</div>
@@ -215,7 +215,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# API Key Configuration
+# Read the Groq API key from the environment or sidebar.
 if "GROQ_API_KEY" in os.environ:
     st.session_state.api_key = os.environ["GROQ_API_KEY"]
 elif "api_key" not in st.session_state:
@@ -227,23 +227,23 @@ elif "api_key" not in st.session_state:
         st.session_state.api_key = api_key
         os.environ["GROQ_API_KEY"] = api_key
 
-# Load Engine dynamically AFTER key is set
+# Create the engine after the API key is available.
 qa_engine = load_qa_engine(st.session_state.get("api_key", os.environ.get("GROQ_API_KEY")))
 
 if not qa_engine:
     st.error("Vector Database not found! Please run the Phase 2/3 test scripts first to index the documents.")
     st.stop()
 
-# Initialize Chat Memory
+# Create chat memory for a new session.
 if "chat_memory" not in st.session_state:
     st.session_state.chat_memory = ChatMemoryBuffer.from_defaults(token_limit=3072)
 
-# Inject session-specific memory into the engine for conversational continuity
+# Give the engine the current session's chat memory.
 qa_engine.set_memory(st.session_state.chat_memory)
 
 st.divider()
 
-# Sidebar for explicit Metadata Filtering
+# Show metadata filters in the sidebar.
 st.sidebar.markdown('<h2 class="sidebar-title">⚙️ Configuration</h2>', unsafe_allow_html=True)
 st.sidebar.markdown("---")
 st.sidebar.markdown('<h3 class="sidebar-title">🔍 Pre-Filtering</h3>', unsafe_allow_html=True)
@@ -256,11 +256,11 @@ vendor_filter = st.sidebar.selectbox(
 alarm_filter = st.sidebar.text_input("Exact Alarm Code (e.g. 1000-9999)", value="", help="Enter the exact alarm code for precise filtering")
 node_id_filter = st.sidebar.text_input("Exact Node ID (e.g. Cisco-Core-Delhi-NCR-1)", value="", help="Enter exact Node ID to explicitly filter search")
 
-# Initialize chat history
+# Create the displayed chat history for a new session.
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Add a clear chat button to the sidebar
+# Add a button to clear the current chat.
 st.sidebar.markdown("---")
 if st.sidebar.button("🗑️ Clear Chat History", use_container_width=True, type="secondary"):
     st.session_state.messages = []
@@ -269,7 +269,7 @@ if st.sidebar.button("🗑️ Clear Chat History", use_container_width=True, typ
     logger.info(json.dumps({"event": "chat_cleared"}))
     st.rerun()
 
-# Display chat history on app rerun
+# Render earlier messages after Streamlit reruns the script.
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -282,13 +282,13 @@ for message in st.session_state.messages:
                     if idx < len(message["sources"]):
                         st.markdown("---")
 
-# Main UI code
+# Read and handle a new user message.
 if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM_CODE_404 on router XYZ?'): "):
-    # Display user message in chat message container
+    # Show the user message first.
     st.chat_message("user").markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Prepare filters
+    # Build filters from the sidebar values.
     filters = {}
     if vendor_filter != "Any":
         filters["equipment_vendor"] = vendor_filter
@@ -297,7 +297,7 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
     if node_id_filter.strip():
         filters["node_id"] = node_id_filter.strip()
         
-    # Query Engine with timing for structured logging
+    # Run the query and record its latency.
     with st.chat_message("assistant"):
         with st.spinner("Retrieving SOPs and Synthesizing Answer (with Chain-of-Thought)..."):
             try:
@@ -305,12 +305,10 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                 response = qa_engine.query(prompt, filters=filters if filters else None)
                 latency = time.time() - start_time
                 
-                # Get response text (ContextChatEngine returns AgentChatResponse)
+                # Convert the LlamaIndex response to display text.
                 response_text = str(response)
                 
-                # --- Zero-results guard ---
-                # For the first question, we REQUIRE retrieved sources.
-                # For follow-ups, we allow the LLM to answer from existing chat memory.
+                # Require sources for the first question in a chat.
                 is_follow_up = len(st.session_state.messages) > 1
                 num_sources = len(response.source_nodes) if hasattr(response, 'source_nodes') and response.source_nodes else 0
                 
@@ -334,7 +332,7 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                 
                 st.markdown(response_text)
                 
-                # Structured logging for observability
+                # Record the request outcome in the application log.
                 logger.info(json.dumps({
                     "event": "query_executed",
                     "query": prompt,
@@ -345,7 +343,7 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                     "status": "success"
                 }))
                 
-                # Extract Sources explicitly for grading
+                # Store source snippets with the displayed answer.
                 source_data = []
                 if hasattr(response, 'source_nodes') and response.source_nodes:
                     with st.expander("📄 Show Retrieved Context (For Academic Evaluation)", expanded=False):
@@ -368,7 +366,7 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                                 "text": source_text[:500] + "...\n[TRUNCATED]"
                             })
                             
-                # Add assistant response to chat history
+                # Save the assistant response in the current session.
                 st.session_state.messages.append({"role": "assistant", "content": response_text, "sources": source_data})
                 
             except Exception as e:
@@ -377,7 +375,7 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                 st.error(error_msg)
                 st.session_state.messages.append({"role": "assistant", "content": error_msg})
                 
-                # Log the error
+                # Record the failure in the application log.
                 logger.error(json.dumps({
                     "event": "query_failed",
                     "query": prompt,
@@ -387,4 +385,3 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                     "error": str(e),
                     "status": "error"
                 }))
-
