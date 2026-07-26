@@ -5,8 +5,10 @@ import logging
 import time
 import json
 
-# Add the project root so the src package can be imported.
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+from dotenv import load_dotenv
+
+# Load environment variables first
+load_dotenv()
 
 from src.retrieval.vector_store import TelecomVectorStore
 from src.retrieval.hybrid_search import TelecomHybridRetriever
@@ -179,29 +181,19 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Create the QA engine once for the Streamlit resource cache.
+# Cache the stateless retrieval services.
 @st.cache_resource
-def load_qa_engine(api_key: str = None):
+def load_retrieval_services():
     db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "chroma_db"))
     if not os.path.exists(db_path):
-        return None
-    
-    # Set the key before creating the Groq client.
-    if api_key:
-        os.environ["GROQ_API_KEY"] = api_key
+        return None, None, None
         
     vs_manager = TelecomVectorStore(db_path=db_path)
     retriever = TelecomHybridRetriever(vector_store_manager=vs_manager, similarity_top_k=10)
     router = SemanticRouter()
     topology_service = NetworkTopologyService()
-    llm = get_llm_generator()
     
-    return ProceduralQAEngine(
-        retriever_pipeline=retriever,
-        router=router,
-        topology_service=topology_service,
-        llm=llm
-    )
+    return retriever, router, topology_service
 
 # Display the page header.
 st.markdown("""
@@ -215,24 +207,31 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# Read the Groq API key from the environment or sidebar.
-if "GROQ_API_KEY" in os.environ:
-    st.session_state.api_key = os.environ["GROQ_API_KEY"]
-elif "api_key" not in st.session_state:
-    api_key = st.sidebar.text_input("Groq API Key (Free)", type="password")
-    if not api_key:
-        st.warning("Please enter your Groq API Key (from console.groq.com) in the sidebar to use the free LLM.")
-        st.stop()
-    else:
-        st.session_state.api_key = api_key
-        os.environ["GROQ_API_KEY"] = api_key
+# Validate the Groq API key from the environment.
+api_key = os.environ.get("GROQ_API_KEY")
+if not api_key:
+    st.error("🚨 Configuration Error: GROQ_API_KEY is not found in the environment.")
+    st.info("Please open the `.env` file in the project root, add `GROQ_API_KEY=your_key_here`, and restart the app.")
+    st.stop()
 
-# Create the engine after the API key is available.
-qa_engine = load_qa_engine(st.session_state.get("api_key", os.environ.get("GROQ_API_KEY")))
+# Load shared read-only services.
+retriever, router, topology_service = load_retrieval_services()
 
-if not qa_engine:
+if not retriever:
     st.error("Vector Database not found! Please run the Phase 2/3 test scripts first to index the documents.")
     st.stop()
+
+# Create the stateful QA engine per-session.
+if "qa_engine" not in st.session_state:
+    llm = get_llm_generator(api_key=api_key)
+    st.session_state.qa_engine = ProceduralQAEngine(
+        retriever_pipeline=retriever,
+        router=router,
+        topology_service=topology_service,
+        llm=llm
+    )
+
+qa_engine = st.session_state.qa_engine
 
 # Create chat memory for a new session.
 if "chat_memory" not in st.session_state:

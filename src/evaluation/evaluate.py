@@ -7,8 +7,8 @@ import argparse
 import time
 from typing import Sequence
 
-# Add the project root so the src package can be imported.
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+# Assume the package is installed or run with PYTHONPATH.
+
 
 def load_ground_truth(path: str) -> list[dict]:
     """Load evaluation Q&A pairs from JSON file."""

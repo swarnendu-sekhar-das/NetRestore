@@ -44,10 +44,13 @@ else
     echo "Existing vector database found. Skipping ingestion."
 fi
 
+# Ensure the application package can be imported globally
+export PYTHONPATH=/app
+
 echo "Starting the Streamlit application."
 
 # Replace this shell with the Streamlit process.
-exec streamlit run src/app/main.py \
+exec python3 -m streamlit run src/app/main.py \
     --server.port=8501 \
     --server.address=0.0.0.0 \
     --server.headless=true
