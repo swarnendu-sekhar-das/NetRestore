@@ -31,6 +31,7 @@ pytest>=8.0.0                      # Unit testing framework
 
 # Utilities
 python-dotenv==1.2.2               # Environment variable management
+python-json-logger==2.0.7          # ELK stack JSON logging
 
 # Dependency Constraints
 # Note: torchvision is installed via Dockerfile CPU-only wheel index

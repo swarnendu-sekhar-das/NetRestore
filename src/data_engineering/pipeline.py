@@ -20,12 +20,12 @@ class DataPipeline:
         self.pdf_chunker = get_pdf_chunker()
         self.metadata_extractor = TelecomMetadataExtractor()
 
-    def run(self) -> list[TextNode]:
+    def run(self, processed_files: set = None) -> list[TextNode]:
         """Load SOP PDFs, split them into chunks, and add metadata."""
         logger.info("Starting data pipeline.")
-        docs = self.parser.load_documents()
+        docs = self.parser.load_documents(processed_files)
         if not docs:
-            logger.warning("No documents found. Aborting pipeline.")
+            logger.info("No new documents to process. Aborting pipeline.")
             return []
 
         logger.info("Chunking documents.")
@@ -59,6 +59,9 @@ class DataPipeline:
                 # Keep the filename so the source can be shown later.
                 if "file_name" not in node.metadata:
                     node.metadata["file_name"] = doc.metadata.get("file_name", "Unknown")
+                    
+                # Explicitly prepend the file name to the chunk text so BM25 and Vector search always have context
+                node.text = f"[Context: {node.metadata['file_name']}]\n" + node.text
             
             nodes.extend(doc_nodes)
 

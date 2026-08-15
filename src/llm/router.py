@@ -1,11 +1,12 @@
 import json
 import os
 import logging
+import re
 
 logger = logging.getLogger("netrestore")
 
 class SemanticRouter:
-    """Route obvious telecom queries with keywords from a configuration file."""
+    """Route obvious telecom queries with keywords and extract syslog metrics."""
     def __init__(self, config_path: str = None):
         if not config_path:
             config_path = os.path.abspath(
@@ -21,21 +22,43 @@ class SemanticRouter:
         logger.warning("Warning: keywords.json was not found. The router has no configured keywords.")
         return []
 
-    def classify(self, query: str, has_memory: bool = False) -> str:
-        """Return ``telecom`` for supported queries and ``general`` otherwise."""
-        query_lower = query.lower()
+    def is_syslog(self, text: str) -> bool:
+        """Detect if the input looks like a raw syslog or telemetry dump."""
+        syslog_patterns = [
+            r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b',  # IP Address
+            r'%[A-Z0-9_]+-\d-[A-Z0-9_]+',          # Syslog tag e.g., %SYS-5-CONFIG
+            r'(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}', # Timestamp
+            r'ALARM_\d+'                           # Custom mock alarm codes
+        ]
+        
+        for pattern in syslog_patterns:
+            if re.search(pattern, text, re.IGNORECASE):
+                return True
+        return False
+        
+    def extract_ip(self, text: str) -> str:
+        """Extract the first IPv4 address found in the text for Graph Retrieval."""
+        match = re.search(r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b', text)
+        if match:
+            return match.group(0)
+        return ""
 
-        # Treat follow-up questions as telecom questions.
+    def classify(self, query: str, has_memory: bool = False) -> str:
+        """Return ``telecom`` for supported queries/syslogs and ``general`` otherwise."""
         if has_memory:
             return "telecom"
+            
+        if self.is_syslog(query):
+            return "telecom"
 
-        # Check the configured telecom keywords.
+        query_lower = query.lower()
+
         for keyword in self.keywords:
             if keyword in query_lower:
                 return "telecom"
 
-        # Keep alarm-related questions in scope.
         if "alarm" in query_lower or "code" in query_lower:
             return "telecom"
 
         return "general"
+

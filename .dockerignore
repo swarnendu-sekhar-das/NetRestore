@@ -11,7 +11,7 @@
 *.egg-info/
 
 # Local Vector Database (rebuilt inside container on first start)
-chroma_db/
+# chroma_db/ excluded so it can be baked into the image
 
 # Git History (not needed in production image)
 .git/

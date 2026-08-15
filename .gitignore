@@ -43,9 +43,11 @@ Thumbs.db     # Windows
 
 # Project-Specific Artifacts
 api.txt       # API keys (should be in .env)
-data/llm_generated_sops/*.pdf  # Ignore the 675 generated PDFs (prevent repo bloat)
-!chroma_db/   # DO NOT ignore the database! We need it for Streamlit Cloud deployment.
-
+data/sops/*.pdf  # Ignore the generated PDFs (prevent repo bloat)
+data/network_topology.json     # Ignore generated topology JSON
+data/eval_dataset.json         # Ignore generated eval dataset
+chroma_db/                     # Ignore vector DB locally, will use K8s PVC in production
+shared_data/                   # Ignore ledger and bm25 serialized index
 # DevOps Security Exclusions
 vault/        # HashiCorp Vault secrets
 *.pem         # Private keys

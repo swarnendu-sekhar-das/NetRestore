@@ -17,13 +17,30 @@ class TelecomDocumentParser:
         self.data_dir = data_dir
         self.required_exts = required_exts or SOP_FILE_EXTENSIONS
         
-    def load_documents(self) -> list[Document]:
-        """Load approved SOP PDFs from the configured corpus directory."""
+    def load_documents(self, processed_files: set = None) -> list[Document]:
+        """Load approved SOP PDFs, skipping those already processed."""
         if not os.path.exists(self.data_dir):
             logger.warning(f"Directory {self.data_dir} not found.")
             return []
             
-        logger.info(f"Loading documents from {self.data_dir}.")
+        if processed_files is None:
+            processed_files = set()
+            
+        # List all valid files in the data directory
+        all_files = []
+        for root, _, files in os.walk(self.data_dir):
+            for file in files:
+                if any(file.endswith(ext) for ext in self.required_exts):
+                    all_files.append(os.path.join(root, file))
+                    
+        # Filter out already processed files
+        files_to_process = [f for f in all_files if os.path.basename(f) not in processed_files]
+        
+        if not files_to_process:
+            logger.info("No new documents to parse.")
+            return []
+            
+        logger.info(f"Found {len(files_to_process)} new documents to load (skipped {len(all_files) - len(files_to_process)}).")
         
         # Use LlamaParse when it is configured; otherwise use the default PDF reader.
         file_extractor = {}
@@ -39,9 +56,7 @@ class TelecomDocumentParser:
             logger.info("No LLAMA_CLOUD_API_KEY found. Using standard PyPDF for PDF parsing.")
 
         reader = SimpleDirectoryReader(
-            input_dir=self.data_dir,
-            recursive=True,
-            required_exts=self.required_exts,
+            input_files=files_to_process,
             file_extractor=file_extractor if file_extractor else None
         )
         documents = reader.load_data()

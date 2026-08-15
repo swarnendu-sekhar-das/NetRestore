@@ -43,8 +43,11 @@ class ProceduralQAEngine:
             # Return early for questions outside the supported scope.
             return _OutOfScopeResponse(OUT_OF_SCOPE_RESPONSE)
 
-        # Add static topology context when a matching node is present.
-        topology_ctx = self.topology_service.get_topology_context(query_str, filters)
+        # Extract Syslog IP via SemanticRouter
+        extracted_ip = self.router.extract_ip(query_str)
+
+        # Add static topology context when a matching node or IP is present.
+        topology_ctx = self.topology_service.get_topology_context(query_str, filters, ip_address=extracted_ip)
         topology_suffix = ""
         if topology_ctx:
             topology_suffix = TOPOLOGY_CONTEXT_TEMPLATE.format(topology_context=topology_ctx)

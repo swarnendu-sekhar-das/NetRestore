@@ -3,7 +3,7 @@ import re
 from typing import List, Dict, Any, Optional
 
 from llama_index.core.schema import TextNode, BaseNode
-from llama_index.core.node_parser import MarkdownNodeParser, SentenceSplitter
+from llama_index.core.node_parser import MarkdownNodeParser
 from llama_index.core.extractors import BaseExtractor
 
 
@@ -52,11 +52,56 @@ class TelecomMetadataExtractor(BaseExtractor):
         return metadata
 
 
+class RegexSOPParser:
+    """Custom Node Parser to chunk SOP PDFs using structural anchor words."""
+    
+    def __init__(self):
+        self.sections = [
+            "Description",
+            "Pre-requisite Checks",
+            "Potential Root Causes",
+            "Diagnostic Commands & Expected Outputs",
+            "Resolution Steps",
+            "Post-Check Verification",
+            "Roll-back Procedures"
+        ]
+        
+    def get_nodes_from_documents(self, documents: List[Any], **kwargs) -> List[BaseNode]:
+        nodes = []
+        for doc in documents:
+            text = doc.get_content()
+            
+            # Split the text by section headers using Regex.
+            pattern = r'(' + '|'.join(self.sections) + r')'
+            parts = re.split(pattern, text)
+            
+            # First part is the document title and metadata
+            sections_dict = {"Header": parts[0]}
+            
+            # Iterate through the rest of the parts
+            for i in range(1, len(parts), 2):
+                if i+1 < len(parts):
+                    sec_title = parts[i]
+                    sec_content = parts[i+1]
+                    sections_dict[sec_title] = sec_content
+                    
+            # Create a node for each structural section
+            for title, content in sections_dict.items():
+                if content.strip():
+                    node = TextNode(
+                        text=f"[{title}]\n{content.strip()}",
+                        metadata=doc.metadata.copy()
+                    )
+                    nodes.append(node)
+                    
+        return nodes
+
+
 def get_markdown_chunker():
     """Return a header-based chunker for Markdown documents."""
     return MarkdownNodeParser()
 
 
 def get_pdf_chunker():
-    """Return a sentence-based chunker for text extracted from PDFs."""
-    return SentenceSplitter(chunk_size=512, chunk_overlap=64)
+    """Return a regex-based structural parser for SOP PDFs."""
+    return RegexSOPParser()

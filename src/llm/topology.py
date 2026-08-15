@@ -110,20 +110,32 @@ class NetworkTopologyService:
         query: str,
         filters: dict = None,
         max_hops: int = DEFAULT_MAX_HOPS,
+        ip_address: str = None
     ) -> str:
         """Build static, bounded topology reachability context for a query."""
         if not self.topology:
             return ""
 
         query_lower = query.lower()
-        specific_node = next(
-            (
-                node
-                for node_id, node in self._nodes_by_id.items()
-                if node_id.lower() in query_lower
-            ),
-            None,
-        )
+        specific_node = None
+        
+        # 1. Try to find by IP Address first
+        if ip_address:
+            specific_node = next(
+                (node for node in self._nodes_by_id.values() if node.get("ip_address") == ip_address),
+                None
+            )
+            
+        # 2. Fallback to finding by Node ID in query text
+        if not specific_node:
+            specific_node = next(
+                (
+                    node
+                    for node_id, node in self._nodes_by_id.items()
+                    if node_id.lower() in query_lower
+                ),
+                None,
+            )
 
         if specific_node:
             traversal = self.get_impact_paths(specific_node["node_id"], max_hops=max_hops)

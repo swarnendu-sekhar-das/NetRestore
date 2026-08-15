@@ -15,8 +15,15 @@ class TelecomVectorStore:
         self.collection_name = collection_name
         self.embed_model = get_embedding_model()
         
-        # Open the persistent ChromaDB collection.
-        self.db = chromadb.PersistentClient(path=self.db_path)
+        # Connect to ChromaDB (Cloud-Native vs Local Fallback)
+        chroma_host = os.environ.get("CHROMADB_HOST")
+        if chroma_host:
+            logger.info(f"Connecting to remote ChromaDB at {chroma_host}:8000")
+            self.db = chromadb.HttpClient(host=chroma_host, port=8000)
+        else:
+            logger.info(f"Using local PersistentClient ChromaDB at {self.db_path}")
+            self.db = chromadb.PersistentClient(path=self.db_path)
+            
         self.chroma_collection = self.db.get_or_create_collection(self.collection_name)
         
         # Wrap the collection for LlamaIndex.

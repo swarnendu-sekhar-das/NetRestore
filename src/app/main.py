@@ -4,6 +4,7 @@ import sys
 import logging
 import time
 import json
+from pythonjsonlogger import jsonlogger
 
 from dotenv import load_dotenv
 
@@ -18,14 +19,13 @@ from src.llm.topology import NetworkTopologyService
 from src.llm.generator import get_llm_generator
 from llama_index.core.memory import ChatMemoryBuffer
 
-# Set up JSON logging for the app.
+# Set up JSON logging for the app (ELK Stack Ready).
 logger = logging.getLogger("netrestore")
 if not logger.handlers:
     logger.setLevel(logging.INFO)
     handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter(
-        '{"timestamp":"%(asctime)s","level":"%(levelname)s","module":"%(name)s","message":%(message)s}'
-    ))
+    formatter = jsonlogger.JsonFormatter('%(asctime)s %(levelname)s %(name)s %(message)s')
+    handler.setFormatter(formatter)
     logger.addHandler(handler)
 
 # Configure the Streamlit page.
@@ -189,7 +189,8 @@ def load_retrieval_services():
         return None, None, None
         
     vs_manager = TelecomVectorStore(db_path=db_path)
-    retriever = TelecomHybridRetriever(vector_store_manager=vs_manager, similarity_top_k=10)
+    from src.retrieval.hybrid_search import get_hybrid_retriever
+    retriever = get_hybrid_retriever(vs_manager)
     router = SemanticRouter()
     topology_service = NetworkTopologyService()
     
@@ -210,7 +211,7 @@ st.markdown("""
 # Validate the Groq API key from the environment.
 api_key = os.environ.get("GROQ_API_KEY")
 if not api_key:
-    st.error("🚨 Configuration Error: GROQ_API_KEY is not found in the environment.")
+    st.error("Configuration Error: GROQ_API_KEY is not found in the environment.")
     st.info("Please open the `.env` file in the project root, add `GROQ_API_KEY=your_key_here`, and restart the app.")
     st.stop()
 
@@ -218,7 +219,7 @@ if not api_key:
 retriever, router, topology_service = load_retrieval_services()
 
 if not retriever:
-    st.error("Vector Database not found! Please run the Phase 2/3 test scripts first to index the documents.")
+    st.error("Vector Database not found! Please run the scripts first to index the documents.")
     st.stop()
 
 # Create the stateful QA engine per-session.
@@ -242,18 +243,14 @@ qa_engine.set_memory(st.session_state.chat_memory)
 
 st.divider()
 
-# Show metadata filters in the sidebar.
+# Show configuration in the sidebar.
 st.sidebar.markdown('<h2 class="sidebar-title">⚙️ Configuration</h2>', unsafe_allow_html=True)
 st.sidebar.markdown("---")
-st.sidebar.markdown('<h3 class="sidebar-title">🔍 Pre-Filtering</h3>', unsafe_allow_html=True)
-st.sidebar.markdown("Use these filters to ensure exact error codes are retrieved via Metadata Filtering, solving the issue of pure vector search missing specific model numbers.")
-vendor_filter = st.sidebar.selectbox(
-    "Equipment Vendor", 
-    ["Any", "Nokia", "Cisco", "Juniper", "Ericsson", "Huawei", "Arista"],
-    label_visibility="visible"
-)
-alarm_filter = st.sidebar.text_input("Exact Alarm Code (e.g. 1000-9999)", value="", help="Enter the exact alarm code for precise filtering")
-node_id_filter = st.sidebar.text_input("Exact Node ID (e.g. Cisco-Core-Delhi-NCR-1)", value="", help="Enter exact Node ID to explicitly filter search")
+st.sidebar.markdown('<h3 class="sidebar-title">📋 Syslog / Telemetry Input</h3>', unsafe_allow_html=True)
+st.sidebar.markdown("Paste raw device syslogs, alerts, or telemetry here for automated analysis. NetRestore will automatically extract IPs, assess blast radius, and retrieve the correct SOP.")
+
+syslog_input = st.sidebar.text_area("Raw Syslog Payload:", height=150, key="syslog_input")
+analyze_syslog_clicked = st.sidebar.button("Analyze Telemetry", type="primary", use_container_width=True)
 
 # Create the displayed chat history for a new session.
 if "messages" not in st.session_state:
@@ -281,27 +278,23 @@ for message in st.session_state.messages:
                     if idx < len(message["sources"]):
                         st.markdown("---")
 
-# Read and handle a new user message.
-if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM_CODE_404 on router XYZ?'): "):
+# Handle user input from either chat or the syslog text area
+prompt = st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM_CODE_404 on router XYZ?'): ")
+if analyze_syslog_clicked and st.session_state.syslog_input.strip():
+    prompt = st.session_state.syslog_input.strip()
+
+if prompt:
     # Show the user message first.
     st.chat_message("user").markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Build filters from the sidebar values.
-    filters = {}
-    if vendor_filter != "Any":
-        filters["equipment_vendor"] = vendor_filter
-    if alarm_filter.strip():
-        filters["alarm_code"] = alarm_filter.strip()
-    if node_id_filter.strip():
-        filters["node_id"] = node_id_filter.strip()
-        
     # Run the query and record its latency.
     with st.chat_message("assistant"):
         with st.spinner("Retrieving SOPs and Synthesizing Answer (with Chain-of-Thought)..."):
             try:
                 start_time = time.time()
-                response = qa_engine.query(prompt, filters=filters if filters else None)
+                # Query no longer needs exact-match metadata filters because BM25 sparse retrieval handles this accurately.
+                response = qa_engine.query(prompt, filters=None)
                 latency = time.time() - start_time
                 
                 # Convert the LlamaIndex response to display text.
@@ -312,26 +305,12 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                 num_sources = len(response.source_nodes) if hasattr(response, 'source_nodes') and response.source_nodes else 0
                 
                 if (num_sources == 0 and not is_follow_up) or not response_text.strip():
-                    parts = []
-                    if alarm_filter.strip():
-                        parts.append(f"alarm code **{alarm_filter.strip()}**")
-                    if vendor_filter != "Any":
-                        parts.append(f"vendor **{vendor_filter}**")
-                    if node_id_filter.strip():
-                        parts.append(f"node ID **{node_id_filter.strip()}**")
-                    
-                    if parts:
-                        st.error(f"No documents found matching {' and '.join(parts)}. Please try relaxing the filters.")
-                    else:
-                        st.error("No documents found matching your query. Please try rephrasing or relaxing the filters.")
-                    
-                    dataset_name = "dataset" if vendor_filter == "Any" else f"{vendor_filter} dataset"
+                    st.error("No documents found matching your query. Please try rephrasing.")
                     response_text = (
                         f"⚠️ No matching SOP documents found.\n\n"
                         f"**Possible reasons:**\n"
-                        f"- The alarm code or query keywords may not exist in the {dataset_name}\n"
-                        f"- Try a 4-digit code (e.g. `1000-9999`) instead\n"
-                        f"- Clear any active filters and search by description only"
+                        f"- The alarm code or query keywords may not exist in the dataset\n"
+                        f"- Try searching with a raw syslog chunk"
                     )
                 
                 st.markdown(response_text)
@@ -340,8 +319,6 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                 logger.info(json.dumps({
                     "event": "query_executed",
                     "query": prompt,
-                    "vendor_filter": vendor_filter,
-                    "alarm_filter": alarm_filter,
                     "latency_seconds": round(latency, 3),
                     "num_sources": len(response.source_nodes) if hasattr(response, 'source_nodes') and response.source_nodes else 0,
                     "status": "success"
@@ -384,8 +361,6 @@ if prompt := st.chat_input("Ask a procedural question (e.g., 'How to clear ALARM
                 logger.error(json.dumps({
                     "event": "query_failed",
                     "query": prompt,
-                    "vendor_filter": vendor_filter,
-                    "alarm_filter": alarm_filter,
                     "latency_seconds": round(latency, 3),
                     "error": str(e),
                     "status": "error"

@@ -17,7 +17,7 @@ def get_llm_generator(api_key: str = None):
         logger.warning("Warning: GROQ_API_KEY is not set. LLM generation may fail.")
         
     llm = Groq(
-        model="llama-3.1-8b-instant",
+        model="llama-3.3-70b-versatile",
         temperature=0.0,  # Use repeatable output for procedural answers.
         api_key=key_to_use,
     )

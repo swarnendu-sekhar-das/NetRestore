@@ -37,9 +37,7 @@ COPY scripts/ ./scripts/
 # Store downloaded Hugging Face models in the application cache directory.
 ENV HF_HOME=/app/.cache/huggingface
 
-# Create the database directory and set script permissions.
-RUN mkdir -p /app/chroma_db && \
-    chmod +x /app/scripts/start.sh && \
+RUN chmod +x /app/scripts/start.sh && \
     chown -R appuser:appuser /app
 
 # Check that Streamlit responds on its health endpoint.
