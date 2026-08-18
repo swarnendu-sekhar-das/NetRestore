@@ -149,13 +149,32 @@ class TelecomHybridRetriever:
 
     def search(self, query: str, filters: dict = None):
         bundle = QueryBundle(query_str=query)
-        v_results = self.vector_retriever._retrieve(bundle, filters)
-        s_results = self.sparse_retriever._retrieve(bundle, filters)
         
-        fused = RRFCombiner.fuse([v_results, s_results], top_n=self.similarity_top_k)
+        v_results = []
+        try:
+            v_results = self.vector_retriever._retrieve(bundle, filters)
+        except Exception as e:
+            logger.warning(f"Vector retrieval failed, falling back to BM25-only: {e}")
+
+        s_results = []
+        try:
+            s_results = self.sparse_retriever._retrieve(bundle, filters)
+        except Exception as e:
+            logger.warning(f"Sparse retrieval failed, falling back to dense-only: {e}")
+            
+        if not v_results and not s_results:
+            logger.error("Both retrievers failed. Returning empty results.")
+            return []
+            
+        fused = RRFCombiner.fuse([r for r in [v_results, s_results] if r], top_n=self.similarity_top_k)
         
         if self.reranker and len(fused) > 0:
-            return self.reranker.rerank(query, fused, top_n=self.similarity_top_k)
+            try:
+                return self.reranker.rerank(query, fused, top_n=self.similarity_top_k)
+            except Exception as e:
+                logger.warning(f"Reranking failed, skipping reranker: {e}")
+                return fused[:self.similarity_top_k]
+                
         return fused[:self.similarity_top_k]
 
     def get_retriever(self, filters: dict = None) -> BaseRetriever:

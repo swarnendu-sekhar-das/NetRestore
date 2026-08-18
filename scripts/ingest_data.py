@@ -38,49 +38,53 @@ for node in new_nodes:
         new_files.add(node.metadata["file_name"])
 
 # 3. Smart ChromaDB Insertion
-logger.info(f'Indexing {len(new_nodes)} new chunks into ChromaDB.')
-vs = TelecomVectorStore(db_path='chroma_db')
-vs.insert_nodes(new_nodes)
+try:
+    logger.info(f'Indexing {len(new_nodes)} new chunks into ChromaDB.')
+    vs = TelecomVectorStore(db_path='chroma_db')
+    vs.insert_nodes(new_nodes)
 
-def tokenize(text):
-    # Extract only Telecom Node IDs and Alarm Codes for sparse retrieval to prevent syslog noise dilution
-    special_tokens = re.findall(r'[A-Za-z]+-[A-Za-z]+-\d+|ALARM_\d+', text.upper())
-    if special_tokens:
-        return [t.lower() for t in special_tokens]
-    return re.findall(r'[\w-]+', text.lower())
+    def tokenize(text):
+        # Extract only Telecom Node IDs and Alarm Codes for sparse retrieval to prevent syslog noise dilution
+        special_tokens = re.findall(r'[A-Za-z]+-[A-Za-z]+-\d+|ALARM_\d+', text.upper())
+        if special_tokens:
+            return [t.lower() for t in special_tokens]
+        return re.findall(r'[\w-]+', text.lower())
 
-# 4. Smart BM25 Appending
-old_nodes = []
-old_corpus = []
+    # 4. Smart BM25 Appending
+    old_nodes = []
+    old_corpus = []
 
-if os.path.exists(bm25_path):
-    logger.info("Loading historical BM25 data to append new chunks.")
-    with open(bm25_path, 'rb') as f:
-        data = pickle.load(f)
-        old_nodes = data.get("nodes", [])
-        old_corpus = data.get("corpus", [])
-        
-        # If corpus wasn't saved in a previous version, we must rebuild it from old nodes
-        if not old_corpus and old_nodes:
-            logger.info("Re-tokenizing historical nodes (Legacy index detected).")
-            old_corpus = [tokenize(node.get_content()) for node in old_nodes]
+    if os.path.exists(bm25_path):
+        logger.info("Loading historical BM25 data to append new chunks.")
+        with open(bm25_path, 'rb') as f:
+            data = pickle.load(f)
+            old_nodes = data.get("nodes", [])
+            old_corpus = data.get("corpus", [])
+            
+            # If corpus wasn't saved in a previous version, we must rebuild it from old nodes
+            if not old_corpus and old_nodes:
+                logger.info("Re-tokenizing historical nodes (Legacy index detected).")
+                old_corpus = [tokenize(node.get_content()) for node in old_nodes]
 
-logger.info(f"Tokenizing {len(new_nodes)} new chunks.")
-new_corpus = [tokenize(node.get_content()) for node in new_nodes]
+    logger.info(f"Tokenizing {len(new_nodes)} new chunks.")
+    new_corpus = [tokenize(node.get_content()) for node in new_nodes]
 
-combined_nodes = old_nodes + new_nodes
-combined_corpus = old_corpus + new_corpus
+    combined_nodes = old_nodes + new_nodes
+    combined_corpus = old_corpus + new_corpus
 
-logger.info("Recomputing BM25 matrix on combined corpus...")
-bm25 = BM25Okapi(combined_corpus)
+    logger.info("Recomputing BM25 matrix on combined corpus...")
+    bm25 = BM25Okapi(combined_corpus)
 
-# 5. Save State
-with open(bm25_path, 'wb') as f:
-    pickle.dump({"bm25": bm25, "nodes": combined_nodes, "corpus": combined_corpus}, f)
+    # 5. Save State
+    with open(bm25_path, 'wb') as f:
+        pickle.dump({"bm25": bm25, "nodes": combined_nodes, "corpus": combined_corpus}, f)
 
-processed_files.update(new_files)
-with open(ledger_path, 'w') as f:
-    json.dump(list(processed_files), f, indent=4)
+    processed_files.update(new_files)
+    with open(ledger_path, 'w') as f:
+        json.dump(list(processed_files), f, indent=4)
 
-logger.info(f"Successfully appended {len(new_nodes)} chunks. Total nodes: {len(combined_nodes)}.")
-logger.info("Ingestion complete.")
+    logger.info(f"Successfully appended {len(new_nodes)} chunks. Total nodes: {len(combined_nodes)}.")
+    logger.info("Ingestion complete.")
+except Exception as e:
+    logger.error(f"Ingestion failed: {e}. Ledger NOT updated — files will be retried on next run.")
+    raise

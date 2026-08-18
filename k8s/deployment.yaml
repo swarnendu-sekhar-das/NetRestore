@@ -58,25 +58,25 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: netrestore-deployment
+  name: netrestore-backend
   labels:
-    app: netrestore
+    app: netrestore-backend
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: netrestore
+      app: netrestore-backend
   template:
     metadata:
       labels:
-        app: netrestore
+        app: netrestore-backend
     spec:
       containers:
-      - name: netrestore
-        image: swarnendusekhardas/netrestore:latest
+      - name: netrestore-backend
+        image: swarnendusekhardas/netrestore-backend:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 8501
+        - containerPort: 8000
         resources:
           requests:
             cpu: "250m"
@@ -103,25 +103,25 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: netrestore-service
+  name: netrestore-backend-service
 spec:
   selector:
-    app: netrestore
+    app: netrestore-backend
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 8501
-  type: LoadBalancer
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: netrestore-hpa
+  name: netrestore-backend-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: netrestore-deployment
+    name: netrestore-backend
   minReplicas: 3
   maxReplicas: 10
   metrics:
@@ -131,3 +131,42 @@ spec:
       target:
         type: Utilization
         averageUtilization: 70
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netrestore-frontend
+  labels:
+    app: netrestore-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netrestore-frontend
+  template:
+    metadata:
+      labels:
+        app: netrestore-frontend
+    spec:
+      containers:
+      - name: netrestore-frontend
+        image: swarnendusekhardas/netrestore-frontend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8501
+        env:
+        - name: BACKEND_URL
+          value: "http://netrestore-backend-service:8000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netrestore-frontend-service
+spec:
+  selector:
+    app: netrestore-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8501
+  type: LoadBalancer

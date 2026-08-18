@@ -65,8 +65,10 @@ pipeline {
                 sh '''
                     # Log in before the build to avoid Docker Hub pull limits.
                     echo ${DOCKER_HUB_PSW} | docker login -u ${DOCKER_HUB_USR} --password-stdin
-                    echo "Building Docker image"
-                    docker build -t ${IMAGE}:${TAG} -t ${IMAGE}:latest .
+                    echo "Building Backend Docker image"
+                    docker build -t ${IMAGE}-backend:${TAG} -t ${IMAGE}-backend:latest -f Dockerfile.backend .
+                    echo "Building Frontend Docker image"
+                    docker build -t ${IMAGE}-frontend:${TAG} -t ${IMAGE}-frontend:latest -f Dockerfile.frontend .
                 '''
             }
         }
@@ -75,8 +77,10 @@ pipeline {
             steps {
                 sh '''
                     echo ${DOCKER_HUB_PSW} | docker login -u ${DOCKER_HUB_USR} --password-stdin
-                    docker push ${IMAGE}:${TAG}
-                    docker push ${IMAGE}:latest
+                    docker push ${IMAGE}-backend:${TAG}
+                    docker push ${IMAGE}-backend:latest
+                    docker push ${IMAGE}-frontend:${TAG}
+                    docker push ${IMAGE}-frontend:latest
                 '''
             }
         }
@@ -87,8 +91,9 @@ pipeline {
                     echo "Deploying to Kubernetes"
                     # Apply the deployment manifest to ensure K8s knows about it
                     kubectl apply -f k8s/deployment.yaml
-                    # Force a rolling restart to pull the new :latest image
-                    kubectl rollout restart deployment netrestore-deployment
+                    # Force a rolling restart to pull the new :latest images
+                    kubectl rollout restart deployment netrestore-backend
+                    kubectl rollout restart deployment netrestore-frontend
                     echo "Kubernetes rolling restart triggered successfully."
                 '''
             }
