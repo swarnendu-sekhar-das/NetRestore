@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir uv
 # We only need Streamlit, requests, and python-dotenv for the frontend.
 # But for simplicity in this project we'll just install from the main requirements
 COPY requirements.txt .
-RUN uv pip install --system --no-cache streamlit requests python-dotenv
+RUN uv pip install --system --no-cache --index-strategy unsafe-best-match --extra-index-url https://download.pytorch.org/whl/cpu streamlit requests python-dotenv
 
 # Copy only frontend application code
 COPY src/app/ src/app/

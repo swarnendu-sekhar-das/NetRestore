@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir uv
 
 # Python dependencies
 COPY requirements.txt .
-RUN uv pip install --system --no-cache -r requirements.txt
+RUN uv pip install --system --no-cache --index-strategy unsafe-best-match --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
 
 # Create directories for shared data
 RUN mkdir -p chroma_db shared_data data/sops

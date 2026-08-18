@@ -4,7 +4,7 @@ import os
 import pickle
 import json
 import logging
-import streamlit as st
+
 from llama_index.core.retrievers import BaseRetriever, VectorIndexRetriever
 from llama_index.core.vector_stores import MetadataFilters, ExactMatchFilter
 from llama_index.core.schema import NodeWithScore, QueryBundle
@@ -191,7 +191,7 @@ class TelecomHybridRetriever:
         return WrapperRetriever()
 
 
-@st.cache_resource
+
 def load_bm25_cache(file_path: str, _last_modified: float):
     """
     Global Singleton Cache for BM25.
