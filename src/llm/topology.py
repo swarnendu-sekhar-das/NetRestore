@@ -27,7 +27,7 @@ class NetworkTopologyService:
             node_id.lower(): node for node_id, node in self._nodes_by_id.items()
         }
         self._adjacency = {
-            node_id: list(node.get("connected_to", []))
+            node_id: [n.get("node_id") for n in node.get("neighbors", []) if n.get("node_id")]
             for node_id, node in self._nodes_by_id.items()
         }
 

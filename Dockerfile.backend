@@ -22,9 +22,13 @@ RUN mkdir -p chroma_db shared_data data/sops
 COPY src/ src/
 COPY data/ data/
 COPY scripts/ scripts/
+COPY config/ config/
 
 # Set Python path to find src module
 ENV PYTHONPATH=/app
 
-# Run FastAPI with Uvicorn
-CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Pre-download HF models so the container can start offline
+RUN python -c "from sentence_transformers import CrossEncoder; CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2'); from llama_index.embeddings.huggingface import HuggingFaceEmbedding; HuggingFaceEmbedding(model_name='all-MiniLM-L6-v2')"
+
+# Run FastAPI with Uvicorn via startup script
+CMD ["bash", "scripts/startup.sh"]

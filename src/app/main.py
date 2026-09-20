@@ -79,18 +79,57 @@ st.markdown("""
     
     /* Chat messages */
     .stChatMessage {
-        background-color: white;
+        background-color: #f8f9fa;
+        color: #1e293b;
         border-radius: 8px;
         padding: 1rem;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         margin-bottom: 1rem;
         border: 1px solid #e2e8f0;
     }
-    
-    /* Source snippets */
+
+    /* Streamlit's dark theme otherwise keeps its light text inside our
+       deliberately white chat cards, making responses unreadable. */
+    .stChatMessage [data-testid="stMarkdownContainer"],
+    .stChatMessage [data-testid="stMarkdownContainer"] > p,
+    .stChatMessage [data-testid="stMarkdownContainer"] > ul,
+    .stChatMessage [data-testid="stMarkdownContainer"] > ol,
+    .stChatMessage [data-testid="stMarkdownContainer"] > h1,
+    .stChatMessage [data-testid="stMarkdownContainer"] > h2,
+    .stChatMessage [data-testid="stMarkdownContainer"] > h3,
+    .stChatMessage [data-testid="stText"] {
+        color: #1e293b !important;
+    }
+
+    /* We removed the aggressive wildcard (*) above because it was overriding code block text colors. 
+       Now we specifically target code blocks with high specificity to ensure light text on dark background. */
+    .stChatMessage [data-testid="stMarkdownContainer"] pre,
+    .stChatMessage [data-testid="stMarkdownContainer"] pre *,
+    .stChatMessage [data-testid="stMarkdownContainer"] code {
+        color: #f8f9fa !important;
+    }
+
+    .stChatMessage [data-testid="stMarkdownContainer"] pre {
+        background-color: #1e293b !important;
+        border: 1px solid #334155 !important;
+        border-radius: 6px;
+        padding: 0.75rem;
+    }
+
+    /* Inline code blocks (not inside pre) */
+    .stChatMessage [data-testid="stMarkdownContainer"] p code,
+    .stChatMessage [data-testid="stMarkdownContainer"] li code {
+        color: #e11d48 !important;
+        background-color: #f1f5f9 !important;
+        padding: 0.1rem 0.3rem;
+        border-radius: 4px;
+    }
+
+    /* Source snippets outside chat */
     pre {
-        background-color: #f1f5f9;
-        border: 1px solid #cbd5e1;
+        background-color: #1e293b;
+        color: #f8f9fa;
+        border: 1px solid #334155;
         border-radius: 6px;
         padding: 0.75rem;
     }

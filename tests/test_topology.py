@@ -12,9 +12,9 @@ class NetworkTopologyServiceTests(unittest.TestCase):
             {
                 "network_topology": {
                     "nodes": [
-                        {"node_id": "A", "vendor": "Cisco", "role": "Core", "connected_to": ["B", "MISSING"]},
-                        {"node_id": "B", "vendor": "Cisco", "role": "PE", "connected_to": ["A", "C"]},
-                        {"node_id": "C", "vendor": "Cisco", "role": "Access", "connected_to": ["A"]},
+                        {"node_id": "A", "vendor": "Cisco", "role": "Core", "neighbors": [{"node_id": "B"}, {"node_id": "MISSING"}]},
+                        {"node_id": "B", "vendor": "Cisco", "role": "PE", "neighbors": [{"node_id": "A"}, {"node_id": "C"}]},
+                        {"node_id": "C", "vendor": "Cisco", "role": "Access", "neighbors": [{"node_id": "A"}]},
                     ],
                     "rules": ["Static data is advisory."],
                 }

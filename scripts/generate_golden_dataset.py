@@ -28,7 +28,7 @@ def generate_syslog(node_id, alarm_code):
         return f"Mar 12 10:00:00 {node_id} ALARM: Node experiencing critical failure with alarm code {alarm_code}"
 
 def main():
-    sops_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'llm_generated_sops'))
+    sops_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'sops'))
     if not os.path.exists(sops_dir):
         print(f"Error: {sops_dir} does not exist. Run generate_sops_pdf.py first to generate the SOPs.")
         return

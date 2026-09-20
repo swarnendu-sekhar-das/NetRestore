@@ -108,33 +108,6 @@ class RRFCombiner:
         return fused
 
 
-class GraphRetriever:
-    """Queries network_topology.json for Blast Radius context."""
-    def __init__(self, topology_path="data/network_topology.json"):
-        self.topology_path = topology_path
-        self.nodes = []
-        self._load_topology()
-        
-    def _load_topology(self):
-        if not os.path.exists(self.topology_path):
-            logger.warning(f"Topology file not found at {self.topology_path}")
-            return
-        with open(self.topology_path, 'r') as f:
-            data = json.load(f)
-            self.nodes = data.get("nodes", [])
-            
-    def get_blast_radius(self, ip_address: str) -> str:
-        if not ip_address:
-            return ""
-        for node in self.nodes:
-            if node.get("ip_address") == ip_address:
-                neighbors = [n.get("node_id") for n in node.get("neighbors", [])]
-                if neighbors:
-                    return f"BLAST RADIUS WARNING: Node {node.get('node_id')} ({ip_address}) is connected to {', '.join(neighbors)}."
-                return f"Node {node.get('node_id')} ({ip_address}) has no critical downstream neighbors."
-        return ""
-
-
 class TelecomHybridRetriever:
     """Facade for the UI to call the fused retrieval easily."""
     def __init__(self, vector_store_manager=None, similarity_top_k=10, bm25_path="shared_data/bm25_index.pkl"):

@@ -18,12 +18,10 @@ class SopIngestionTests(unittest.TestCase):
                 TelecomDocumentParser(temp_dir).load_documents()
 
             _, kwargs = reader.call_args
-            self.assertEqual(kwargs["input_dir"], temp_dir)
-            self.assertEqual(kwargs["required_exts"], SOP_FILE_EXTENSIONS)
-            self.assertEqual(SOP_FILE_EXTENSIONS, [".pdf"])
+            self.assertIn("input_files", kwargs)
+            self.assertEqual(len(kwargs["input_files"]), 1)
+            self.assertTrue(kwargs["input_files"][0].endswith("approved_sop.pdf"))
 
     def test_production_entry_points_target_sop_directory(self):
         with open("scripts/ingest_data.py") as script:
             self.assertIn("data/sops", script.read())
-        with open("scripts/start.sh") as script:
-            self.assertIn("/app/data/sops", script.read())

@@ -97,11 +97,6 @@ class RegexSOPParser:
         return nodes
 
 
-def get_markdown_chunker():
-    """Return a header-based chunker for Markdown documents."""
-    return MarkdownNodeParser()
-
-
 def get_pdf_chunker():
     """Return a regex-based structural parser for SOP PDFs."""
     return RegexSOPParser()

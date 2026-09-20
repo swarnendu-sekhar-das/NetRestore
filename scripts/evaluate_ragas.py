@@ -1,10 +1,20 @@
 import os
 import json
 import logging
+import sys
+
+# Add the project root to PYTHONPATH so we can import from src
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from types import ModuleType
+sys.modules["langchain_community.chat_models"] = ModuleType("langchain_community.chat_models")
+sys.modules["langchain_community.chat_models.vertexai"] = ModuleType("langchain_community.chat_models.vertexai")
+sys.modules["langchain_community.chat_models.vertexai"].ChatVertexAI = None
+
 try:
     from datasets import Dataset
     from ragas import evaluate
-    from ragas.metrics import faithfulness, answer_relevancy
+    from ragas.metrics import Faithfulness, AnswerRelevancy
 except ImportError:
     pass
 
@@ -47,37 +57,67 @@ def run_evaluation():
     contexts = []
     ground_truths = []
     
-    hits = 0
-    total = min(5, len(dataset_records))
+    hits_at_1 = 0
+    hits_at_3 = 0
+    hits_at_10 = 0
+    total = min(9, len(dataset_records)) # test a few more to include edge cases
     
-    # We will test only the first 5 to save time/API tokens in CI.
+    # We will test only the first few to save time/API tokens in CI.
     for record in dataset_records[:total]:
         query = record["question"]
         gt_doc = record["expected_document_name"]
         
         questions.append(query)
-        ground_truths.append([gt_doc])
+        ground_truths.append(gt_doc)  # Ragas 0.3+ requires a string, not a list of strings
         
         try:
             response = qa_engine.query_stateless(query)
             answers.append(str(response))
             
             # Check if the hybrid retriever fetched the exact document we expected
-            retrieved_docs = [node.metadata.get("file_name", "") for node in response.source_nodes] if hasattr(response, 'source_nodes') else []
-            if gt_doc in retrieved_docs:
-                hits += 1
-                logger.info(f"✅ HIT: Retrieved {gt_doc}")
+            retrieved_filenames = [node.metadata.get("file_name", "") for node in response.source_nodes] if hasattr(response, 'source_nodes') else []
+            
+            if gt_doc == "NONE":
+                if not retrieved_filenames or "cannot find the procedure" in str(response).lower() or "i'm a specialized network support assistant" in str(response).lower():
+                    hits_at_1 += 1
+                    hits_at_3 += 1
+                    hits_at_10 += 1
+                    logger.info(f"✅ HIT: Handled out-of-scope/unknown correctly")
+                else:
+                    logger.warning(f"❌ MISS: Expected out-of-scope, got {retrieved_filenames}")
             else:
-                logger.warning(f"❌ MISS: Expected {gt_doc}, got {retrieved_docs}")
+                if gt_doc in retrieved_filenames[:1]:
+                    hits_at_1 += 1
+                if gt_doc in retrieved_filenames[:3]:
+                    hits_at_3 += 1
+                if gt_doc in retrieved_filenames[:10]:
+                    hits_at_10 += 1
+                    
+                if gt_doc in retrieved_filenames[:10]:
+                    logger.info(f"✅ HIT: Retrieved {gt_doc}")
+                else:
+                    logger.warning(f"❌ MISS: Expected {gt_doc}, got {retrieved_filenames}")
                 
-            contexts.append(retrieved_docs)
+            # RAGAS requires the actual text context to compute Faithfulness, not just filenames.
+            node_texts = [node.get_content() for node in response.source_nodes] if hasattr(response, 'source_nodes') else []
+            
+            # Since we inject Topology into the prompt dynamically, we must also append it to the RAGAS context
+            # so the 120B Judge knows the LLM didn't hallucinate the network nodes.
+            extracted_ip = qa_engine.router.extract_ip(query)
+            topo_ctx = qa_engine.topology_service.get_topology_context(query, ip_address=extracted_ip)
+            if topo_ctx:
+                node_texts.append("--- NETWORK TOPOLOGY CONTEXT ---\n" + topo_ctx)
+                
+            contexts.append(node_texts)
         except Exception as e:
             logger.error(f"Failed query: {e}")
             answers.append("Error")
             contexts.append([])
 
     logger.info(f"\n--- EVALUATION RESULTS ---")
-    logger.info(f"Retriever Accuracy (Hit Rate): {hits}/{total} ({(hits/total)*100:.1f}%)")
+    logger.info(f"Recall@1: {hits_at_1}/{total} ({(hits_at_1/total)*100:.1f}%)")
+    logger.info(f"Recall@3: {hits_at_3}/{total} ({(hits_at_3/total)*100:.1f}%)")
+    logger.info(f"Recall@10: {hits_at_10}/{total} ({(hits_at_10/total)*100:.1f}%)")
 
     data_dict = {
         "question": questions,
@@ -89,15 +129,31 @@ def run_evaluation():
     try:
         eval_dataset = Dataset.from_dict(data_dict)
         logger.info("Executing RAGAS metrics computation...")
-        # Note: RAGAS defaults to OpenAI. If OPENAI_API_KEY is not set, we mock completion for CI.
-        if "OPENAI_API_KEY" not in os.environ:
-            logger.warning("OPENAI_API_KEY not found. Skipping deep RAGAS eval, outputting structure only.")
-            logger.info(f"Generated {len(answers)} answers for Golden Dataset.")
-            return
             
+        from openai import OpenAI
+        from ragas.llms import llm_factory
+        from ragas.embeddings import HuggingFaceEmbeddings
+        
+        # Configure the judge LLM to use a fast, high-context model to avoid timeouts on massive text payloads
+        # We use the OpenAI client since Groq exposes an OpenAI-compatible API
+        groq_client = OpenAI(
+            api_key=os.environ.get("GROQ_API_KEY"),
+            base_url="https://api.groq.com/openai/v1"
+        )
+        ragas_llm = llm_factory(model="openai/gpt-oss-120b", client=groq_client)
+        
+        # Configure the embeddings using langchain-huggingface which exposes the
+        # embed_query interface required by AnswerRelevancy metric
+        from langchain_huggingface import HuggingFaceEmbeddings as LCHFEmbeddings
+        from ragas.embeddings import LangchainEmbeddingsWrapper
+        lc_emb = LCHFEmbeddings(model_name="all-MiniLM-L6-v2")
+        ragas_emb = LangchainEmbeddingsWrapper(lc_emb)
+        
         result = evaluate(
             eval_dataset,
-            metrics=[faithfulness, answer_relevancy]
+            metrics=[Faithfulness(), AnswerRelevancy()],
+            llm=ragas_llm,
+            embeddings=ragas_emb
         )
         print("RAGAS Evaluation Result:", result)
     except Exception as e:

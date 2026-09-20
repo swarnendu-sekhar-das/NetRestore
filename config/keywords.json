@@ -8,6 +8,13 @@
     "router", "switch", "interface", "port", "sfp", "optic",
     "line card", "npu", "psu", "fan tray",
     "nokia", "cisco", "juniper", "ericsson", "huawei", "arista",
-    "down", "flapping", "timeout", "degraded", "unreachable", "failure"
+    "down", "flapping", "timeout", "degraded", "unreachable", "failure",
+    "network", "node", "link", "traffic", "connectivity",
+    "issue", "problem", "error", "fix", "resolve", "facing",
+    "not working", "went down", "dropped", "disconnected", "lost",
+    "core", "access", "pe router", "ce router", "aggregation",
+    "packet loss", "latency", "jitter", "bandwidth", "throughput",
+    "reboot", "reload", "reset", "crash", "hung", "stuck",
+    "syslog", "trap", "snmp", "netconf", "telemetry"
   ]
 }

@@ -28,7 +28,7 @@ pipeline {
                     echo "Running flake8 lint"
                     flake8 src/ --max-line-length=120 --ignore=E501,W503
                     echo "Running unit tests"
-                    python -m pytest notebooks/test_chunking.py tests -v
+                    python3 -m pytest tests -q
                 '''
             }
         }
@@ -39,8 +39,7 @@ pipeline {
                 withEnv(["GROQ_API_KEY=${GROQ_KEY}"]) {
                     sh '''
                         . .ci-env/bin/activate
-                        echo "Running API smoke test"
-                        python notebooks/test_llm.py || echo "API smoke test completed (expected failure without real API key)"
+                        echo "API smoke test disabled (requires API key)"
                     '''
                 }
             }
@@ -54,7 +53,7 @@ pipeline {
                         echo "Installing evaluation dependencies"
                         uv pip install ragas datasets || true
                         echo "Running RAGAS evaluation on the Golden Dataset"
-                        python scripts/evaluate_ragas.py || echo "RAGAS Evaluation completed"
+                        python scripts/evaluate_ragas.py
                     '''
                 }
             }
