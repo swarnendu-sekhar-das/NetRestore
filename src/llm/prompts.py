@@ -1,5 +1,3 @@
-from llama_index.core import PromptTemplate
-
 # Main prompt for procedural answers with chat history.
 SYSTEM_PROMPT = (
     "You are an expert Network Support Engineer with deep knowledge of "

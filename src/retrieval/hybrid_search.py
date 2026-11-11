@@ -2,7 +2,6 @@
 
 import os
 import pickle
-import json
 import logging
 
 from llama_index.core.retrievers import BaseRetriever, VectorIndexRetriever
@@ -195,11 +194,8 @@ class TelecomHybridRetriever:
 
 
 def load_bm25_cache(file_path: str, _last_modified: float):
-    """
-    Global Singleton Cache for BM25.
-    Streamlit ignores parameters starting with _ for hashing, but uses them for invalidation.
-    """
-    logger.info("Loading BM25 matrix into global Streamlit cache...")
+    """Load cached BM25 index and node corpus from disk."""
+    logger.info("Loading BM25 index from disk cache...")
     if not os.path.exists(file_path):
         logger.warning(f"BM25 index not found at {file_path}")
         return {}
@@ -207,7 +203,7 @@ def load_bm25_cache(file_path: str, _last_modified: float):
         return pickle.load(f)
 
 def get_hybrid_retriever(vs_manager, bm25_path="shared_data/bm25_index.pkl"):
-    """Dependency Injection factory for Streamlit UI."""
+    """Dependency Injection factory for TelecomHybridRetriever."""
     if not os.path.exists(bm25_path):
         alt_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "shared_data", "bm25_index.pkl"))
         if os.path.exists(alt_path):

@@ -1,9 +1,7 @@
-import os
 import re
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 
 from llama_index.core.schema import TextNode, BaseNode
-from llama_index.core.node_parser import MarkdownNodeParser
 from llama_index.core.extractors import BaseExtractor
 
 

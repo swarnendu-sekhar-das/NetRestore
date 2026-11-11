@@ -39,7 +39,8 @@ pipeline {
                 withEnv(["GROQ_API_KEY=${GROQ_KEY}"]) {
                     sh '''
                         . .ci-env/bin/activate
-                        echo "API smoke test disabled (requires API key)"
+                        echo "Running integration tests"
+                        python3 -m pytest tests/test_remediation.py -q
                     '''
                 }
             }

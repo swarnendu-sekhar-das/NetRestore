@@ -2,7 +2,6 @@ import os
 import sys
 import time
 import asyncio
-import logging
 from typing import Optional, Dict, Any
 from collections import OrderedDict
 
@@ -20,7 +19,7 @@ load_dotenv()
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from src.retrieval.vector_store import TelecomVectorStore
-from src.retrieval.hybrid_search import TelecomHybridRetriever
+from src.retrieval.hybrid_search import get_hybrid_retriever
 from src.llm.qa_engine import ProceduralQAEngine
 from src.llm.router import SemanticRouter
 from src.llm.topology import NetworkTopologyService
@@ -55,7 +54,6 @@ async def lifespan(app_instance: FastAPI):
 
     if os.path.exists(db_path):
         vector_store = TelecomVectorStore(db_path=db_path)
-        from src.retrieval.hybrid_search import get_hybrid_retriever
         hybrid_retriever = get_hybrid_retriever(vector_store, bm25_path=bm25_path)
         router = SemanticRouter()
         topology_service = NetworkTopologyService()

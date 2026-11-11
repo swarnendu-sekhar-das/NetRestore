@@ -132,7 +132,6 @@ def run_evaluation():
             
         from openai import OpenAI
         from ragas.llms import llm_factory
-        from ragas.embeddings import HuggingFaceEmbeddings
         
         # Configure the judge LLM to use a fast, high-context model to avoid timeouts on massive text payloads
         # We use the OpenAI client since Groq exposes an OpenAI-compatible API

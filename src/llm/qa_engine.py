@@ -1,21 +1,21 @@
 """Connect retrieval, topology context, and the LLM for user questions."""
 
-import os
-import json
 import re
+import logging
 from llama_index.core.chat_engine import ContextChatEngine
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.query_engine import RetrieverQueryEngine
-from llama_index.core.response_synthesizers import get_response_synthesizer, ResponseMode
+from llama_index.core.response_synthesizers import ResponseMode
 from llama_index.core.retrievers import BaseRetriever
-from llama_index.core.schema import NodeWithScore, TextNode, QueryBundle
-from src.llm.generator import get_llm_generator
+from llama_index.core.schema import QueryBundle
 from src.llm.prompts import (
     SYSTEM_PROMPT,
     TOPOLOGY_CONTEXT_TEMPLATE,
     OUT_OF_SCOPE_RESPONSE,
     CONTEXT_QA_PROMPT_TMPL,
 )
+
+logger = logging.getLogger("netrestore")
 
 
 class ProceduralQAEngine:
@@ -28,11 +28,11 @@ class ProceduralQAEngine:
         self.topology_service = topology_service
         self.llm = llm
         self.token_limit = token_limit
-        # Streamlit provides session-specific chat memory.
+        # Default chat memory fallback
         self.memory = None
 
     def set_memory(self, memory: ChatMemoryBuffer):
-        """Set the chat memory for the current Streamlit session."""
+        """Set the default chat memory buffer (for backward compatibility)."""
         self.memory = memory
 
     def query(self, query_str: str, filters: dict = None, memory: ChatMemoryBuffer = None):
@@ -144,8 +144,8 @@ class ProceduralQAEngine:
                             return self.nodes
                     engine_retriever = ExactSOPRetriever(exact_nodes)
             except Exception as e:
-                # If retrieval fails here, let the chat engine try or fallback normally
-                pass
+                # If pre-retrieval verification encounters an error, fallback to normal retrieval
+                logger.debug(f"Pre-retrieval verification skipped: {e}")
 
         # Use active session memory when available, preventing global singleton race conditions
         memory = active_memory or ChatMemoryBuffer.from_defaults(
@@ -244,8 +244,8 @@ class ProceduralQAEngine:
                             def retrieve(self, str_or_bundle, **kwargs):
                                 return self.nodes
                         base_retriever = ExactSOPStatelessRetriever(exact_nodes)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Stateless alarm verification skipped: {e}")
 
         engine = RetrieverQueryEngine.from_args(
             retriever=base_retriever,

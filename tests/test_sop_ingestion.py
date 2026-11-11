@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from src.data_engineering.parser import SOP_FILE_EXTENSIONS, TelecomDocumentParser
+from src.data_engineering.parser import TelecomDocumentParser
 
 
 class SopIngestionTests(unittest.TestCase):

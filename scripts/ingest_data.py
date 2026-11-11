@@ -5,7 +5,6 @@ from src.data_engineering.pipeline import DataPipeline
 from src.retrieval.vector_store import TelecomVectorStore
 from src.retrieval.tokenizer import telecom_tokenize
 from rank_bm25 import BM25Okapi
-import re
 import logging
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

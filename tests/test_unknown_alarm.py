@@ -25,8 +25,12 @@ class DummyRetrieverPipeline:
         return DummyRetriever(self.mock_nodes)
 
 class DummyLLM:
+    system_prompt = ""
     def chat(self, messages):
-        pass
+        from llama_index.core.llms import ChatResponse, ChatMessage
+        return ChatResponse(message=ChatMessage(role="assistant", content="Step 1: Check configurations."))
+    def predict(self, prompt, **kwargs):
+        return "Step 1: Check configurations."
     @property
     def metadata(self):
         from llama_index.core.llms import LLMMetadata
@@ -62,11 +66,7 @@ class UnknownAlarmBehaviorTests(unittest.TestCase):
             llm=DummyLLM()
         )
         
-        # In a real scenario, this would return a chat response. Since DummyLLM returns a mock response
-        # or raises an error, we just check that it DOES NOT return _OutOfScopeResponse.
-        try:
-            response = qa_engine.query("How to fix ALARM_9999 on router XYZ?")
-            self.assertNotIsInstance(response, _OutOfScopeResponse)
-        except Exception as e:
-            # If the dummy LLM fails to implement something, it's fine as long as we bypassed the out-of-scope check
-            pass
+        # Known alarm code in context should proceed with procedural synthesis
+        response = qa_engine.query("How to fix ALARM_9999 on router XYZ?")
+        self.assertNotIsInstance(response, _OutOfScopeResponse)
+        self.assertIn("Step 1", str(response))
