@@ -156,8 +156,13 @@ class NetworkTopologyService:
 
             if traversal["max_hops"] > 1:
                 parts.append(f"Indirect/reachable dependencies (2..{traversal['max_hops']} hops):")
-                parts.extend(self._format_reachable_node(item) for item in indirect if item["resolved"])
-                if not any(item["resolved"] for item in indirect):
+                resolved_indirect = [item for item in indirect if item["resolved"]]
+                # Limit indirect display to avoid exhausting LLM prompt tokens on central core routers
+                max_indirect_display = 10
+                parts.extend(self._format_reachable_node(item) for item in resolved_indirect[:max_indirect_display])
+                if len(resolved_indirect) > max_indirect_display:
+                    parts.append(f"  • ... and {len(resolved_indirect) - max_indirect_display} more indirect reachable nodes")
+                if not resolved_indirect:
                     parts.append("  • None in the topology data")
 
             if unresolved:

@@ -19,12 +19,14 @@ def get_llm_generator(api_key: str = None):
     # Keep the deployment configurable, while defaulting to a model that is
     # available to this project's Groq account.
     model_name = os.environ.get("GROQ_MODEL", "qwen/qwen3.8-27b")
-    logger.info("Initializing Groq model: %s", model_name)
+    context_window = int(os.environ.get("GROQ_CONTEXT_WINDOW", "32768"))
+    logger.info("Initializing Groq model: %s (context_window: %d)", model_name, context_window)
         
     llm = Groq(
         model=model_name,
         temperature=0.0,  # Use repeatable output for procedural answers.
         max_tokens=512,
+        context_window=context_window,
         api_key=key_to_use,
     )
     return llm

@@ -133,6 +133,14 @@ class ProceduralQAEngine:
                 
                 # Avoid redundant second retrieval: reuse pre-retrieved nodes for synthesis
                 exact_nodes = [n for n in retrieved_nodes if n.node.metadata.get("file_name") == target_sop_file] if target_sop_file else retrieved_nodes
+                if target_sop_file and hasattr(self.retriever, "sparse_retriever") and self.retriever.sparse_retriever:
+                    full_sop_nodes = getattr(self.retriever.sparse_retriever, "file_to_nodes", {}).get(target_sop_file, [])
+                    if full_sop_nodes:
+                        from llama_index.core.schema import NodeWithScore
+                        existing_node_ids = {n.node.node_id for n in exact_nodes}
+                        for fn in full_sop_nodes:
+                            if fn.node_id not in existing_node_ids:
+                                exact_nodes.append(NodeWithScore(node=fn, score=1.0))
                 if exact_nodes:
                     class ExactSOPRetriever(BaseRetriever):
                         def __init__(self, nodes):
