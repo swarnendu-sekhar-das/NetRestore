@@ -10,6 +10,16 @@ class SemanticRouter:
 
     # Node IDs always follow the pattern: LOCATION-ROLE-NN (e.g., BAS-ACC-05, BLR-CORE-01)
     _NODE_ID_RE = re.compile(r'\b[A-Z]{2,5}-(?:CORE|PE|ACC|AGG|CE|P|RR)-\d{2}\b', re.IGNORECASE)
+
+    # Conversational follow-up phrases common in network troubleshooting sessions
+    _FOLLOW_UP_RE = re.compile(
+        r'\b(?:step|steps|procedure|resolution|action|stage|command|cli|syntax|output|expected|'
+        r'rollback|roll-back|revert|undo|restore|verify|verification|check|pre-check|post-check|'
+        r'why|cause|root cause|reason|explain|detail|elaborate|impact|severity|prerequisite|'
+        r'what if|what now|next|then|if that fails|doesn\'t work|does not work|what about|'
+        r'reboot|reload|replace|restart|power|card|asic|module|port|interface|cable|fiber)\b',
+        re.IGNORECASE
+    )
     def __init__(self, config_path: str = None):
         if not config_path:
             config_path = os.path.abspath(
@@ -55,25 +65,25 @@ class SemanticRouter:
 
     def classify(self, query: str, has_memory: bool = False) -> str:
         """Return ``telecom`` for supported queries/syslogs and ``general`` otherwise."""
-        # 1. Follow-up messages in an active session are always in scope.
-        if has_memory:
-            return "telecom"
-
-        # 2. Any mention of a topology node ID is unambiguously telecom.
+        # 1. Any mention of a topology node ID is unambiguously telecom.
         if self.is_node_reference(query):
             logger.debug("Router: node ID pattern detected — classified as telecom.")
             return "telecom"
 
-        # 3. Any mention of an alarm code (e.g. ALARM 3049, ALARM_3049).
+        # 2. Any mention of an alarm code (e.g. ALARM 3049, ALARM_3049).
         if self.is_alarm_reference(query):
             return "telecom"
 
-        # 4. Raw syslog / telemetry dumps (IP, timestamp, alarm codes).
+        # 3. Raw syslog / telemetry dumps (IP, timestamp, alarm codes).
         if self.is_syslog(query):
             return "telecom"
 
-        # 5. Standalone 3-5 digit number (e.g. '3049').
+        # 4. Standalone 3-5 digit number (e.g. '3049').
         if query.strip().isdigit() and 3 <= len(query.strip()) <= 5:
+            return "telecom"
+
+        # 5. Follow-up messages in an active troubleshooting session
+        if has_memory and self._FOLLOW_UP_RE.search(query):
             return "telecom"
 
         # 6. Keyword match against the configured vocabulary with word boundaries

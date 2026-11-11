@@ -73,17 +73,29 @@ class ProceduralQAEngine:
         full_system_prompt = SYSTEM_PROMPT + topology_suffix
 
         # Extract alarm code flexibly: e.g. ALARM_3049, ALARM 3049, ALARM CODE 3049, or standalone digits
-        alarm_match = re.search(r'\bALARM(?:[_\s-]*(?:CODE)?[_\s-]*)?(\d+)\b', query_str, re.IGNORECASE)
+        alarm_re = re.compile(r'\bALARM(?:[_\s-]*(?:CODE)?[_\s-]*)?(\d+)\b', re.IGNORECASE)
+        alarm_match = alarm_re.search(query_str)
         alarm_code = None
         if alarm_match:
             alarm_code = alarm_match.group(1)
         elif query_str.strip().isdigit() and 3 <= len(query_str.strip()) <= 5:
             alarm_code = query_str.strip()
 
-        # Build retrieval query for search: include recent_node_id if current query has none
+        # Multi-turn alarm context resolution:
+        # If query lacks an explicit alarm code, infer the active alarm code from recent chat memory
+        if not alarm_code and has_memory:
+            for msg in reversed(active_memory.get_all()):
+                m = alarm_re.search(msg.content)
+                if m:
+                    alarm_code = m.group(1)
+                    break
+
+        # Build retrieval query for search: include recent_node_id and alarm_code if current query has none
         retrieval_query = query_str
         if not node_id_in_query and recent_node_id:
-            retrieval_query = f"{recent_node_id} {query_str}"
+            retrieval_query = f"{recent_node_id} {retrieval_query}"
+        if not alarm_match and alarm_code:
+            retrieval_query = f"ALARM_{alarm_code} {retrieval_query}"
 
         base_retriever = self.retriever.get_retriever(filters)
         if retrieval_query != query_str:
