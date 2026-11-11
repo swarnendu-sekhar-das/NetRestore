@@ -38,25 +38,26 @@ ENV/
 .ipynb_checkpoints
 
 # Operating System Artifacts
-.DS_Store     # macOS
-Thumbs.db     # Windows
+.DS_Store
+Thumbs.db
 
 # Project-Specific Artifacts
-api.txt       # API keys (should be in .env)
-data/sops/*.pdf  # Ignore the generated PDFs (prevent repo bloat)
-data/network_topology.json     # Ignore generated topology JSON
-data/eval_dataset.json         # Ignore generated eval dataset
-chroma_db/                     # Ignore vector DB locally, will use K8s PVC in production
-shared_data/                   # Ignore ledger and bm25 serialized index
+api.txt
+data/sops/*.pdf
+data/network_topology.json
+data/eval_dataset.json
+chroma_db/
+shared_data/
+
 # DevOps Security Exclusions
-vault/        # HashiCorp Vault secrets
-*.pem         # Private keys
-*.key         # Key files
-*.crt         # Certificates
-*.tfstate     # Terraform state files
+vault/
+*.pem
+*.key
+*.crt
+*.tfstate
 *.tfstate.backup
 .terraform/
 
-# Development Artifacts (not for production repo)
-scratch/              # Debug/scratch scripts
-evaluation_results.json  # Generated at runtime by evaluate.py
+# Development Artifacts
+scratch/
+evaluation_results.json

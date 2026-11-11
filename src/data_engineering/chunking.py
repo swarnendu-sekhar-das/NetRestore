@@ -25,8 +25,8 @@ class TelecomMetadataExtractor(BaseExtractor):
         """Apply regex patterns to find specific telecom entities."""
         metadata = {}
 
-        # Match alarm codes such as ALARM_CODE_404 and ALARM_501.
-        alarm_match = re.search(r'ALARM(?:_CODE)?_(\d+)', text, re.IGNORECASE)
+        # Match alarm codes such as ALARM_CODE_404, ALARM_501, ALARM 3049, etc.
+        alarm_match = re.search(r'\bALARM(?:[_\s-]*(?:CODE)?[_\s-]*)?(\d+)\b', text, re.IGNORECASE)
         if alarm_match:
             metadata["alarm_code"] = alarm_match.group(1)
 
@@ -71,8 +71,8 @@ class RegexSOPParser:
         for doc in documents:
             text = doc.get_content()
             
-            # Split the text by section headers using Regex.
-            pattern = r'(' + '|'.join(self.sections) + r')'
+            # Split the text by section headers using Regex with line boundaries to avoid splitting on inline field labels.
+            pattern = r'(?:\n|^)\s*(' + '|'.join(self.sections) + r')\s*\n'
             parts = re.split(pattern, text)
             
             # First part is the document title and metadata
@@ -81,16 +81,18 @@ class RegexSOPParser:
             # Iterate through the rest of the parts
             for i in range(1, len(parts), 2):
                 if i+1 < len(parts):
-                    sec_title = parts[i]
-                    sec_content = parts[i+1]
+                    sec_title = parts[i].strip()
+                    sec_content = parts[i+1].strip()
                     sections_dict[sec_title] = sec_content
                     
             # Create a node for each structural section
             for title, content in sections_dict.items():
                 if content.strip():
+                    meta = doc.metadata.copy() if hasattr(doc, 'metadata') and doc.metadata else {}
+                    meta["header_path"] = title
                     node = TextNode(
                         text=f"[{title}]\n{content.strip()}",
-                        metadata=doc.metadata.copy()
+                        metadata=meta
                     )
                     nodes.append(node)
                     

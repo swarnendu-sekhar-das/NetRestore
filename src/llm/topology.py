@@ -186,7 +186,11 @@ class NetworkTopologyService:
             ]
             for node in relevant:
                 role = node.get("role", "Unknown")
-                connected = ", ".join(node.get("connected_to", [])) or "None"
+                # Extract neighbor node IDs from the topology JSON schema (neighbors: [{"node_id": ...}])
+                neighbor_list = [n.get("node_id") for n in node.get("neighbors", []) if n.get("node_id")]
+                if not neighbor_list and "connected_to" in node:
+                    neighbor_list = node.get("connected_to", [])
+                connected = ", ".join(neighbor_list) if neighbor_list else "None"
                 parts.append(f"  • Node: {node['node_id']} | Role: {role} | Connected to: {connected}")
 
         rules = self.topology.get("rules", [])

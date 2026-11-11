@@ -29,39 +29,75 @@ class DataPipeline:
             return []
 
         logger.info("Chunking documents.")
-        nodes = []
+        from collections import defaultdict
+        grouped_docs = defaultdict(list)
         for doc in docs:
+            fn = doc.metadata.get("file_name", "unknown")
+            grouped_docs[fn].append(doc)
+
+        nodes = []
+        for file_name, file_pages in grouped_docs.items():
+            file_name_info = file_name.lower()
+            if not file_name_info.endswith(".pdf"):
+                continue
+
+            # Sort pages if page_label is numeric
+            try:
+                sorted_pages = sorted(file_pages, key=lambda p: int(p.metadata.get("page_label", "1")))
+            except (ValueError, TypeError):
+                sorted_pages = file_pages
+
+            full_text = "\n".join([p.get_content() for p in sorted_pages])
+            base_meta = sorted_pages[0].metadata.copy()
+
             # Find the vendor in the document text or filename.
             doc_vendor = None
             vendors = ["Cisco", "Nokia", "Juniper", "Ericsson", "Huawei", "Arista"]
-            # Check the first part of the content and the filename.
-            content_sample = doc.get_content()[:500].lower()
-            file_name_info = doc.metadata.get("file_name", "").lower()
+            content_sample = full_text[:1000].lower()
             for v in vendors:
                 if v.lower() in content_sample or v.lower() in file_name_info:
                     doc_vendor = v
                     break
 
-            # Only PDF SOPs are allowed in the production corpus.
-            if not file_name_info.endswith(".pdf"):
-                continue
-            doc_nodes = self.pdf_chunker.get_nodes_from_documents([doc])
+            # Extract document-level metadata from full document text and filename
+            doc_metadata = self.metadata_extractor._extract_metadata(full_text)
+            import re
+            # Fallback node_id from filename (e.g., IND-ACC-16_ALARM_3049_SOP.pdf)
+            if "node_id" not in doc_metadata:
+                fn_node = re.search(r'([A-Za-z]{2,5}-(?:CORE|PE|ACC|AGG|CE|P|RR)-\d{2})', file_name, re.IGNORECASE)
+                if fn_node:
+                    doc_metadata["node_id"] = fn_node.group(1).upper()
+
+            # Fallback alarm_code from filename
+            if "alarm_code" not in doc_metadata:
+                fn_alarm = re.search(r'ALARM(?:[_\s-]*(?:CODE)?[_\s-]*)?(\d+)', file_name, re.IGNORECASE)
+                if fn_alarm:
+                    doc_metadata["alarm_code"] = fn_alarm.group(1)
+
+            if doc_vendor:
+                doc_metadata["equipment_vendor"] = doc_vendor
+
+            # Create merged document
+            merged_meta = base_meta.copy()
+            merged_meta.update(doc_metadata)
+            merged_meta["file_name"] = file_name
+            from llama_index.core.schema import Document
+            merged_doc = Document(text=full_text, metadata=merged_meta)
+
+            doc_nodes = self.pdf_chunker.get_nodes_from_documents([merged_doc])
             
             for node in doc_nodes:
-                # Extract alarm, vendor, severity, and node metadata.
-                metadata = self.metadata_extractor._extract_metadata(node.get_content())
-                node.metadata.update(metadata)
+                # Ensure every section chunk inherits document-level metadata
+                for k, v in doc_metadata.items():
+                    if k not in node.metadata or not node.metadata[k]:
+                        node.metadata[k] = v
                 
-                # Use the document vendor when the chunk does not contain one.
-                if "equipment_vendor" not in node.metadata and doc_vendor:
-                    node.metadata["equipment_vendor"] = doc_vendor
-                
-                # Keep the filename so the source can be shown later.
                 if "file_name" not in node.metadata:
-                    node.metadata["file_name"] = doc.metadata.get("file_name", "Unknown")
+                    node.metadata["file_name"] = file_name
                     
                 # Explicitly prepend the file name to the chunk text so BM25 and Vector search always have context
-                node.text = f"[Context: {node.metadata['file_name']}]\n" + node.text
+                if not node.text.startswith("[Context:"):
+                    node.text = f"[Context: {node.metadata['file_name']}]\n" + node.text
             
             nodes.extend(doc_nodes)
 

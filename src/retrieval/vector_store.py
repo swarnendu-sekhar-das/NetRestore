@@ -33,6 +33,18 @@ class TelecomVectorStore:
         # Load the index only when it is needed.
         self.index = None
 
+    def reset_collection(self):
+        """Reset or clear the collection to eliminate stale or corrupted chunks."""
+        try:
+            self.db.delete_collection(self.collection_name)
+            logger.info(f"Deleted existing ChromaDB collection: {self.collection_name}")
+        except Exception as e:
+            logger.warning(f"Could not delete collection {self.collection_name}: {e}")
+        self.chroma_collection = self.db.get_or_create_collection(self.collection_name)
+        self.vector_store = ChromaVectorStore(chroma_collection=self.chroma_collection)
+        self.storage_context = StorageContext.from_defaults(vector_store=self.vector_store)
+        self.index = None
+
     def insert_nodes(self, nodes):
         """Embed the supplied chunks and store them in ChromaDB."""
         logger.info(f"Indexing {len(nodes)} chunks into ChromaDB at {self.db_path}.")

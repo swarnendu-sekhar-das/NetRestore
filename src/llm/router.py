@@ -29,13 +29,17 @@ class SemanticRouter:
         """Return True if the text mentions a topology node ID (e.g. BAS-ACC-05)."""
         return bool(self._NODE_ID_RE.search(text))
 
+    def is_alarm_reference(self, text: str) -> bool:
+        """Return True if the text mentions an alarm code or alarm reference."""
+        return bool(re.search(r'\bALARM(?:[_\s-]*(?:CODE)?[_\s-]*)?\d+\b|\bALARM\b', text, re.IGNORECASE))
+
     def is_syslog(self, text: str) -> bool:
         """Detect if the input looks like a raw syslog or telemetry dump."""
         syslog_patterns = [
             r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b',  # IP Address
             r'%[A-Z0-9_]+-\d-[A-Z0-9_]+',          # Syslog tag e.g., %SYS-5-CONFIG
             r'(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}', # Timestamp
-            r'ALARM_\d+'                           # Custom mock alarm codes
+            r'\bALARM(?:[_\s-]*(?:CODE)?[_\s-]*)?\d+\b'  # Custom mock alarm codes (ALARM_3049, ALARM 3049, etc.)
         ]
         for pattern in syslog_patterns:
             if re.search(pattern, text, re.IGNORECASE):
@@ -60,15 +64,30 @@ class SemanticRouter:
             logger.debug("Router: node ID pattern detected — classified as telecom.")
             return "telecom"
 
-        # 3. Raw syslog / telemetry dumps (IP, timestamp, alarm codes).
+        # 3. Any mention of an alarm code (e.g. ALARM 3049, ALARM_3049).
+        if self.is_alarm_reference(query):
+            return "telecom"
+
+        # 4. Raw syslog / telemetry dumps (IP, timestamp, alarm codes).
         if self.is_syslog(query):
             return "telecom"
 
-        # 4. Keyword match against the configured vocabulary.
+        # 5. Standalone 3-5 digit number (e.g. '3049').
+        if query.strip().isdigit() and 3 <= len(query.strip()) <= 5:
+            return "telecom"
+
+        # 6. Keyword match against the configured vocabulary with word boundaries
+        # Prevents false positive substring matches (e.g., 'airport' matching 'port')
         query_lower = query.lower()
+        query_words = set(re.findall(r'\b[a-z0-9_-]+\b', query_lower))
         for keyword in self.keywords:
-            if keyword in query_lower:
-                return "telecom"
+            kw = keyword.lower()
+            if " " in kw or "-" in kw:
+                if kw in query_lower:
+                    return "telecom"
+            else:
+                if kw in query_words:
+                    return "telecom"
 
         return "general"
 

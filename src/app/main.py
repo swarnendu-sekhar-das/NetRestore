@@ -199,12 +199,13 @@ for message in st.session_state.messages:
             st.warning("⚠️ AI Generation is currently unavailable. Displaying raw retrieved context.")
         st.markdown(message["content"])
         if "sources" in message and message["sources"]:
+            displayed_sources = message["sources"][:5]
             with st.expander("📄 Show Retrieved Context", expanded=False):
-                for idx, source in enumerate(message["sources"], 1):
+                for idx, source in enumerate(displayed_sources, 1):
                     st.markdown(f"### Source {idx}")
                     st.markdown(f"**Document:** `{source['file_name']}`  \n**Section Header:** `{source['header']}`  \n**Confidence Score:** `{source['score']:.2f}`")
                     st.text(source['text'])
-                    if idx < len(message["sources"]):
+                    if idx < len(displayed_sources):
                         st.markdown("---")
 
 # Handle user input from either chat or the syslog text area
@@ -231,7 +232,7 @@ if prompt:
                 if response.status_code == 200:
                     data = response.json()
                     answer_text = data.get("answer", "")
-                    sources = data.get("sources", [])
+                    sources = data.get("sources", [])[:5]
                     fallback = data.get("fallback", False)
                     
                     if fallback:

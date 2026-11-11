@@ -3,6 +3,7 @@ import pickle
 sys.path.insert(0, os.getcwd())
 from src.data_engineering.pipeline import DataPipeline
 from src.retrieval.vector_store import TelecomVectorStore
+from src.retrieval.tokenizer import telecom_tokenize
 from rank_bm25 import BM25Okapi
 import re
 import logging
@@ -15,15 +16,20 @@ os.makedirs(shared_data_dir, exist_ok=True)
 ledger_path = os.path.join(shared_data_dir, "ingested_files.json")
 bm25_path = os.path.join(shared_data_dir, "bm25_index.pkl")
 
+force_reindex = "--force" in sys.argv or os.environ.get("FORCE_REINDEX") == "true"
+
 # 1. Load Ledger
 processed_files = set()
-if os.path.exists(ledger_path):
+if not force_reindex and os.path.exists(ledger_path):
     with open(ledger_path, 'r') as f:
         processed_files = set(json.load(f))
 
-logger.info(f"Loaded ledger: {len(processed_files)} files previously ingested.")
+if force_reindex:
+    logger.info("Force reindex requested. Processing all documents from scratch.")
+else:
+    logger.info(f"Loaded ledger: {len(processed_files)} files previously ingested.")
 
-# 2. Run Pipeline (Only processes new files)
+# 2. Run Pipeline
 pipeline = DataPipeline(data_dir='data/sops')
 new_nodes = pipeline.run(processed_files=processed_files)
 
@@ -39,22 +45,18 @@ for node in new_nodes:
 
 # 3. Smart ChromaDB Insertion
 try:
-    logger.info(f'Indexing {len(new_nodes)} new chunks into ChromaDB.')
     vs = TelecomVectorStore(db_path='chroma_db')
+    if force_reindex:
+        logger.info("Clearing old ChromaDB collection before re-indexing.")
+        vs.reset_collection()
+    logger.info(f'Indexing {len(new_nodes)} new chunks into ChromaDB.')
     vs.insert_nodes(new_nodes)
 
-    def tokenize(text):
-        # Extract only Telecom Node IDs and Alarm Codes for sparse retrieval to prevent syslog noise dilution
-        special_tokens = re.findall(r'[A-Za-z]+-[A-Za-z]+-\d+|ALARM_\d+', text.upper())
-        if special_tokens:
-            return [t.lower() for t in special_tokens]
-        return re.findall(r'[\w-]+', text.lower())
-
-    # 4. Smart BM25 Appending
+    # 4. Smart BM25 Appending using centralized telecom tokenizer
     old_nodes = []
     old_corpus = []
 
-    if os.path.exists(bm25_path):
+    if not force_reindex and os.path.exists(bm25_path):
         logger.info("Loading historical BM25 data to append new chunks.")
         with open(bm25_path, 'rb') as f:
             data = pickle.load(f)
@@ -64,10 +66,10 @@ try:
             # If corpus wasn't saved in a previous version, we must rebuild it from old nodes
             if not old_corpus and old_nodes:
                 logger.info("Re-tokenizing historical nodes (Legacy index detected).")
-                old_corpus = [tokenize(node.get_content()) for node in old_nodes]
+                old_corpus = [telecom_tokenize(node.get_content()) for node in old_nodes]
 
     logger.info(f"Tokenizing {len(new_nodes)} new chunks.")
-    new_corpus = [tokenize(node.get_content()) for node in new_nodes]
+    new_corpus = [telecom_tokenize(node.get_content()) for node in new_nodes]
 
     combined_nodes = old_nodes + new_nodes
     combined_corpus = old_corpus + new_corpus

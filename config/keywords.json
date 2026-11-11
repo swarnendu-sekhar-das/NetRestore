@@ -1,20 +1,25 @@
 {
   "telecom_keywords": [
     "alarm", "alarm_code", "procedure", "clear", "restore", "troubleshoot",
-    "outage", "fault", "sop", "mop", "incident", "escalat",
+    "outage", "fault", "sop", "mop", "incident", "escalat", "recovery", "diagnos",
     "bgp", "ospf", "is-is", "isis", "mpls", "ldp", "rsvp", "bfd",
     "vrrp", "hsrp", "lacp", "stp", "vpls", "evpn", "pim", "igmp",
-    "oam", "ipsec", "gre",
-    "router", "switch", "interface", "port", "sfp", "optic",
-    "line card", "npu", "psu", "fan tray",
+    "oam", "ipsec", "gre", "vlan", "vxlan", "segment routing", "sr-mpls",
+    "route", "routing", "protocol", "neighbor", "adjacency", "peer", "peering",
+    "router", "switch", "interface", "port", "sfp", "qsfp", "optic", "optical",
+    "line card", "npu", "psu", "fan tray", "chassis", "blade", "slot", "transceiver",
+    "fiber", "laser", "attenuation", "dbm", "tx", "rx", "loopback",
     "nokia", "cisco", "juniper", "ericsson", "huawei", "arista",
-    "down", "flapping", "timeout", "degraded", "unreachable", "failure",
-    "network", "node", "link", "traffic", "connectivity",
-    "issue", "problem", "error", "fix", "resolve", "facing",
-    "not working", "went down", "dropped", "disconnected", "lost",
-    "core", "access", "pe router", "ce router", "aggregation",
-    "packet loss", "latency", "jitter", "bandwidth", "throughput",
-    "reboot", "reload", "reset", "crash", "hung", "stuck",
-    "syslog", "trap", "snmp", "netconf", "telemetry"
+    "down", "flap", "flaps", "flapped", "flapping", "timeout", "degraded", "unreachable", "failure",
+    "network", "node", "link", "traffic", "connectivity", "session",
+    "issue", "problem", "error", "fix", "resolve", "facing", "investigat",
+    "not working", "went down", "dropped", "drop", "drops", "loss", "disconnected", "lost", "discard",
+    "crc", "fcs", "input error", "output error", "collision", "overrun", "buffer",
+    "core", "access", "pe router", "ce router", "aggregation", "distribution",
+    "packet loss", "latency", "jitter", "bandwidth", "throughput", "congestion",
+    "reboot", "reload", "reset", "crash", "hung", "stuck", "panic",
+    "syslog", "trap", "snmp", "netconf", "telemetry", "kpi",
+    "indiranagar", "koramangala", "whitefield", "hebbal", "basavanagudi", "jayanagar",
+    "marathahalli", "yelahanka", "electronic city", "malleswaram", "btm", "exchange"
   ]
 }

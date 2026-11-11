@@ -10,6 +10,9 @@ services:
       - ./chroma_db:/app/chroma_db
       - ./shared_data:/app/shared_data
       - ./data:/app/data
+      - ./src:/app/src
+      - ./config:/app/config
+      - ./scripts:/app/scripts
     env_file:
       - .env
     environment:
@@ -21,6 +24,8 @@ services:
       dockerfile: Dockerfile.frontend
     ports:
       - "8501:8501"
+    volumes:
+      - ./src/app:/app/src/app
     environment:
       - BACKEND_URL=http://backend:8000
     depends_on:
