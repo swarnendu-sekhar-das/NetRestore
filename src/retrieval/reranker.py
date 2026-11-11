@@ -15,7 +15,7 @@ class TelecomReranker:
             self.model = CrossEncoder(model_name)
             self.available = True
             logger.info(f"Reranker loaded: {model_name}")
-        except ImportError as e:
+        except Exception as e:
             logger.warning(f"Warning: Reranker model could not be loaded: {e}. Using retrieval scores instead.")
             self.model = None
             self.available = False

@@ -1,9 +1,10 @@
 import sys
 import os
-
-from llama_index.core.schema import TextNode
-
+import re
 import logging
+from collections import defaultdict
+
+from llama_index.core.schema import TextNode, Document
 
 logger = logging.getLogger("netrestore")
 
@@ -29,7 +30,6 @@ class DataPipeline:
             return []
 
         logger.info("Chunking documents.")
-        from collections import defaultdict
         grouped_docs = defaultdict(list)
         for doc in docs:
             fn = doc.metadata.get("file_name", "unknown")
@@ -61,7 +61,6 @@ class DataPipeline:
 
             # Extract document-level metadata from full document text and filename
             doc_metadata = self.metadata_extractor._extract_metadata(full_text)
-            import re
             # Fallback node_id from filename (e.g., IND-ACC-16_ALARM_3049_SOP.pdf)
             if "node_id" not in doc_metadata:
                 fn_node = re.search(r'([A-Za-z]{2,5}-(?:CORE|PE|ACC|AGG|CE|P|RR)-\d{2})', file_name, re.IGNORECASE)
@@ -81,7 +80,6 @@ class DataPipeline:
             merged_meta = base_meta.copy()
             merged_meta.update(doc_metadata)
             merged_meta["file_name"] = file_name
-            from llama_index.core.schema import Document
             merged_doc = Document(text=full_text, metadata=merged_meta)
 
             doc_nodes = self.pdf_chunker.get_nodes_from_documents([merged_doc])

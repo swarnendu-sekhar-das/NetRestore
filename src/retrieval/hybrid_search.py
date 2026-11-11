@@ -15,7 +15,7 @@ from src.retrieval.tokenizer import telecom_tokenize
 logger = logging.getLogger("netrestore")
 
 class VectorRetriever(BaseRetriever):
-    """Dense semantic search retriever (SRP applied)."""
+    """Dense semantic search retriever using ChromaDB vector index."""
     def __init__(self, vector_store_manager, similarity_top_k=10):
         super().__init__()
         self.index = vector_store_manager.get_index()
@@ -36,7 +36,7 @@ class VectorRetriever(BaseRetriever):
 
 
 class SparseRetriever(BaseRetriever):
-    """BM25 keyword search retriever (SRP applied)."""
+    """BM25 sparse keyword search retriever using rank-bm25."""
     def __init__(self, bm25_data, similarity_top_k=10):
         super().__init__()
         self.bm25 = bm25_data.get("bm25")
@@ -109,7 +109,7 @@ class RRFCombiner:
 
 
 class TelecomHybridRetriever:
-    """Facade for the UI to call the fused retrieval easily."""
+    """Hybrid search retriever combining dense vector search, BM25, and neural reranking."""
     def __init__(self, vector_store_manager=None, similarity_top_k=10, bm25_path="shared_data/bm25_index.pkl"):
         # For backward compatibility with existing evaluate/test scripts
         if vector_store_manager:
